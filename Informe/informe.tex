@@ -1,0 +1,130 @@
+\documentclass[a4paper]{article}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr}
+\usepackage{charter}   % tipografía
+\usepackage{graphicx}
+\usepackage{makeidx}
+
+\usepackage{float}
+\usepackage{amsmath, amsthm, amssymb}
+\usepackage{amsfonts}
+\usepackage{sectsty}
+\usepackage{wrapfig}
+\usepackage{listings} % necesario para el resaltado de sintaxis
+\usepackage{caption}
+\usepackage{placeins}
+
+\usepackage{hyperref} % agrega hipervínculos en cada entrada del índice
+\hypersetup{          % (en el pdf)
+    colorlinks=true,
+    linktoc=all,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+\input{codesnippet}
+\input{page.layout}
+\usepackage{underscore}
+\usepackage{caratula}
+\usepackage{url}
+\usepackage{color}
+\usepackage{clrscode3e} % necesario para el pseudocodigo (estilo Cormen)
+
+
+
+
+\begin{document}
+
+\lstset{
+  language=C++,                    % (cambiar al lenguaje correspondiente)
+  backgroundcolor=\color{white},   % choose the background color
+  basicstyle=\footnotesize,        % size of fonts used for the code
+  breaklines=true,                 % automatic line breaking only at whitespace
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{red},    % comment style
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  keywordstyle=\color{blue},       % keyword style
+  stringstyle=\color{blue},     % string literal style
+}
+
+\thispagestyle{empty}
+\materia{Sistemas Operativos}
+\submateria{Segundo Cuatrimestre de 2015}
+\titulo{Título}
+\subtitulo{Subtítulo}
+\integrante{Confalonieri, Gisela Belén}{511/11}{gise_5291@yahoo.com.ar} % por cada integrante (apellido, nombre) (n° libreta) (e-mail)
+\integrante{Mignanelli, Alejandro Rubén}{609/11}{minga_titere@hotmail.com} 
+\integrante{Sabarros, Ian}{661/11}{iansden@live.com}
+
+\maketitle
+\newpage
+
+\thispagestyle{empty}
+\vfill
+%\begin{abstract}
+%    \vspace{0.5cm}
+%	
+%
+%\end{abstract}
+
+\thispagestyle{empty}
+\vspace{1.5cm}
+\tableofcontents
+\newpage
+
+%\normalsize
+ 
+\newpage
+
+\section{Ejercicio 1}
+
+\vspace*{0.3cm}
+\input{Ejercicios/ej1}
+\vspace*{0.6cm}
+
+\section{Ejercicio 2}
+
+\vspace*{0.3cm}
+\input{Ejercicios/ej2}
+\vspace*{0.6cm}
+
+\section{Ejercicio 3}
+
+\vspace*{0.3cm}
+\input{Ejercicios/ej3}
+\vspace*{0.6cm}
+
+\section{Ejercicio 4}
+
+\vspace*{0.3cm}
+\input{Ejercicios/ej4}
+\vspace*{0.6cm}
+
+\section{Ejercicio 5}
+
+\vspace*{0.3cm}
+\input{Ejercicios/ej5}
+\vspace*{0.6cm}
+
+\section{Ejercicio 6}
+
+\vspace*{0.3cm}
+\input{Ejercicios/ej6}
+\vspace*{0.6cm}
+
+\section{Ejercicio 7}
+
+\vspace*{0.3cm}
+\input{Ejercicios/ej7}
+\vspace*{0.6cm}
+
+\section{Ejercicio 8}
+
+\vspace*{0.3cm}
+\input{Ejercicios/ej8}
+\vspace*{0.6cm}
+
+\end{document}
