@@ -1,0 +1,12 @@
+# ALGORITMO DE RONALDO
+TaskCPU 100
+
+# MUSICA DE ROLANDO
+TaskConsola 20 2 4
+
+# INTERNET DE ROLANDO
+TaskConsola 25 2 4
+
+# PARA CORRER:
+# ./simusched lote_EJ2.tsk 1 4 0 SchedFCFS
+# ./simusched lote_EJ2.tsk 2 4 0 SchedFCFS
