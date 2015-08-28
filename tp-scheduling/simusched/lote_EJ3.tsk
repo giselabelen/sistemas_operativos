@@ -1,0 +1,12 @@
+# LOTE EJERCICIO 3
+# EXPLICAR POR QUÉ PONEMOS ESTOS PARÁMETROS
+@3
+TaskBatch 10 1
+@1
+TaskBatch 12 9
+@10
+TaskBatch 14 5
+
+# PARA CORRER
+./simusched lote_EJ3.tsk 1 1 1 SchedFCFS | ./graphsched.py > pruebaej3.png
+
