@@ -7,7 +7,7 @@
 using namespace std;
 
 SchedRR::SchedRR(vector<int> argn) {
-	// Round robin recibe la cantidad de cores y sus cpu_quantum por parámetro
+	/*// Round robin recibe la cantidad de cores y sus cpu_quantum por parámetro
 	cant_cpu = argn[0];
 	
 	int arreglo_q[cant_cpu];
@@ -20,6 +20,7 @@ SchedRR::SchedRR(vector<int> argn) {
 		quantum_x_cpu[i] = argn[i+1];
 		actual_x_cpu[i] = NULL;
 	}
+	*/
 }
 
 SchedRR::~SchedRR() {
@@ -28,7 +29,7 @@ SchedRR::~SchedRR() {
 
 
 void SchedRR::load(int pid) {
-	
+	/*
 	// cargo los datos de la tarea que ingresa
 	tarea nueva;
 	nueva.pid = pid;
@@ -57,10 +58,11 @@ void SchedRR::load(int pid) {
 	{
 		proc_esperando.push_back(nueva);
 	}
+	*/
 }
 
 void SchedRR::unblock(int pid) {
-	
+	/*
 	// buscar la tarea correspondiente en las que están esperando y desbloquearla
 	for(list<tarea>::iterator it = proc_esperando.begin(); it != proc_esperando.end(); it++)
 	{
@@ -70,10 +72,11 @@ void SchedRR::unblock(int pid) {
 			break;
 		}
 	}
+	*/
 }
 
 int SchedRR::tick(int cpu, const enum Motivo m) {
-	
+	/*
 	switch(m)
 	{
 		case TICK:
@@ -148,6 +151,8 @@ int SchedRR::tick(int cpu, const enum Motivo m) {
 				}
 			}	
 	}
+	*/
+	return 0;
 }
 
 

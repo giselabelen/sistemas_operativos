@@ -13,7 +13,7 @@ struct tarea{
 	bool bloqueado;
 	int cpu;
 	int quantum;
-}
+};
 
 class SchedRR : public SchedBase {
 	public:
