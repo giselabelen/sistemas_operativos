@@ -1,0 +1,11 @@
+# LOTE EJERCICIO 5
+
+TaskCPU 50
+TaskCPU 50
+TaskCPU 50
+
+TaskConsola 5 3 3
+TaskConsola 5 3 3
+
+# quantum 2, 10 y 50.
+# Con un cambio de contexto de 2 ciclos y un solo nucleo

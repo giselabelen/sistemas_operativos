@@ -24,10 +24,14 @@ class SchedRR : public SchedBase {
 		virtual int tick(int cpu, const enum Motivo m);
 		
 	private:
+
+		int switcheando(int cpu);
 		int cant_cpu;
 		int* quantum_x_cpu;
 		tarea* actual_x_cpu;
 		list<tarea> proc_esperando;
+
+
 };
 
 #endif
