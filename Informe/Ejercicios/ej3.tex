@@ -1,0 +1,34 @@
+\section{Ejercicio 3 - TaskBatch}
+
+Se programó un tipo de tarea llamado {\tt TaskBatch}.  Este tipo de tarea realiza {\it cant_bloqueos} llamadas bloqueantes en momentos elegidos pseudoaleatoriamente, y cada bloqueo dura 1 ciclo.  Además, utiliza el el CPU durante {\it total_cpu} ciclos, incluyendo el tiempo necesario para lanzar las llamadas bloqueantes, pero no el tiempo en el que el proceso permanece bloqueado.
+
+\subsection{Algoritmo}
+
+La idea de nuestro algoritmo se basa en decidir, a cada ciclo y de manera pseudoaleatoria, si se realiza un bloqueo o no.  Para tomar esta decisión vamos a tomar un valor entero ``random'' entre 0 y 1 (1 para bloquear y 0 para no hacerlo), nuevamente utilizando la función {\tt rand()} de C++.
+
+Como cada llamada bloqueante consume 1 ciclo de utilización de CPU, podemos decir que {\it total_cpu} incluye {\it cant_bloqueos} ciclos destinados a las llamadas bloqueantes, y el resto son usos ``puros'' de CPU.  Por este motivo, la decisión pseudoaleatoria de bloquear la tarea se realizará $total\_cpu - cant\_bloqueos$ veces. 
+
+EXPLICAR BIEN POR QUÉ ESTAMOS HACIENDO ESTO
+
+La Figura \ref{cod-tbatch} muestra el pseudo-códgo de este algoritmo.
+
+\begin{figure}[!htb]
+\begin{codebox}
+\Procname{$\proc{TaskBatch}(total\_cpu,cant\_bloqueos)$}
+\li \For $i \leftarrow 0 .. (total\_cpu - cant\_bloqueos - 1)$
+\li \Do 	$bloquear \leftarrow $ valor ``random'' en [0,1]
+\li 		\If $bloquear == 1 \wedge $ aún hay bloqueos por hacer
+\li 		\Then 	bloquear durante 1 ciclo
+\li	 			decrementar $cant\_bloqueos$
+\li 		\Else	usar CPU durante 1 ciclo
+		\End
+	\End
+\li \While aún hay bloqueos por hacer
+\li \Do 		bloquear durante 1 ciclo
+\li 			decrementar $cant\_bloqueos$
+	\End
+\end{codebox}
+\caption{Pseudocódigo TaskBatch}\label{cod-tbatch}
+\end{figure}
+
+\subsection{Pruebas}

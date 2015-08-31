@@ -1,0 +1,12 @@
+# ALGORITMO DE RONALDO
+TaskCPU 100
+
+# MUSICA DE ROLANDO
+TaskConsola 20 2 4
+
+# INTERNET DE ROLANDO
+TaskConsola 25 2 4
+
+# PARA CORRER:(DESDE CARPETA LOTES)
+# .././simusched lote_EJ2.tsk 1 4 0 SchedFCFS | .././graphsched.py > ej2_1core.png
+# .././simusched lote_EJ2.tsk 2 4 0 SchedFCFS | .././graphsched.py > ej2_2core.png
