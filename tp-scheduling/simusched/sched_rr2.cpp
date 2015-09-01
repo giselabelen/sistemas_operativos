@@ -9,7 +9,7 @@ using namespace std;
 SchedRR2::SchedRR2(vector<int> argn) {
 	// Round robin recibe la cantidad de cores y sus cpu_quantum por parámetro
 	cant_cpu = argn[0];
-
+	// cout << cant_cpu << endl;
 	quantum_x_cpu = new int[cant_cpu];
 	cant_tareas_x_cpu = new int[cant_cpu];
 	actual_x_cpu = new tarea2[cant_cpu];
@@ -47,14 +47,16 @@ void SchedRR2::load(int pid) {
 	// hasta ahi inicie el elemento
 	
 	int i;
-	int cpu = cant_tareas_x_cpu[0];
-
+	int tareas = cant_tareas_x_cpu[0];
+	int cpu = 0;
+	// cout << "cpu " << cpu << endl;
 	// busco el cpu para correr esta tarea
 	for(i = 1; i < cant_cpu; i++)
-	{
-		if (cant_tareas_x_cpu[i] < cpu)
+	{//	cout << "no dberia entrar aca" << endl;
+		if (cant_tareas_x_cpu[i] < tareas)
 		{
-			cpu = cant_tareas_x_cpu[i];
+			tareas = cant_tareas_x_cpu[i];
+			cpu = i;
 		}
 	}
 
