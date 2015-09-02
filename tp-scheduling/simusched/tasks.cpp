@@ -40,20 +40,21 @@ void TaskConsola(int pid, vector<int> params) { // params: n, bmin, bmax
 //esta funcion es para entender a sched mystery.. es una task que corre un cierto totalcpu ciclos, se bloquea
 //una vez en el ciclo numero lugardebloqueo y durante longbloqueo ciclos. totalcpu no contepla los ciclos que estuvo 
 //bloqueado
-void TaskExpMyst(int pid, vector<int> params) { // params: totalcpu, lugardebloqueo, longbloqueo
+void TaskExpMyst(int pid, vector<int> params) { // params: totalcpu, lugardebloqueo, longbloqueo, cant_bloqueos
 	
 	int totalcpu = params[0];
 	int lugardebloqueo = params[1];
 	int longbloqueo = params[2];
-
-	//Esto IAN SE LA COMEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-	for(int i = 0; i < totalcpu-1; i++)
+	int cant_bloqueos = params[3];
+	
+	uso_CPU(pid, lugardebloqueo - 1);
+	
+	for (int j = 0; j < cant_bloqueos; j++)
 	{
-
-		if (i == lugardebloqueo && longbloqueo > 0) {uso_IO(pid,longbloqueo);}
-		else {uso_CPU(pid,1);}
-
+		uso_IO(pid,longbloqueo);
 	}
+		
+	uso_CPU(pid, totalcpu - (lugardebloqueo + (cant_bloqueos * longbloqueo)));
 
 	return;
 }
@@ -103,6 +104,6 @@ void tasks_init(void) {
 	register_task(TaskAlterno, -1);
 	register_task(TaskConsola, 3);
 	register_task(TaskBatch, 2);
-	register_task(TaskExpMyst, 3);
+	register_task(TaskExpMyst, 4);
 
 }

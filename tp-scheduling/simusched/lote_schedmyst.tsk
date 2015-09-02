@@ -22,14 +22,14 @@
 #-------------------------------------------------------------------------------------#
 
 #------------------------------Experimento 2------------------------------------------#
-#@0
-#TaskCPU 20
+@0
+TaskCPU 20
 
-#@26
-#TaskCPU 20
+@26
+TaskCPU 20
 
-#@0
-#TaskCPU 20
+@0
+TaskCPU 20
 
 #./simusched lote_schedmyst.tsk 1 1 1 SchedMistery 2 3  | ./graphsched.py > schedmistery1.png
 
@@ -102,14 +102,14 @@
 
 #------------------------------Experimento 6------------------------------------------#
 
-@0
-TaskCPU 25
+#@0
+#TaskCPU 25
 
-@26
-TaskExpMyst 35 18 13
+#@26
+#TaskExpMyst 35 18 13
 
-@0
-TaskCPU 25
+#@0
+#TaskCPU 25
 
 #correr: ./simusched lote_schedmyst.tsk 1 1 1 SchedMistery 3 3 3 3 3 3 3 3| ./graphsched.py > schedmistery2.png
 # ./simusched lote_schedmyst.tsk 1 1 1 SchedMistery 3 3 3 3 3 3 3 3 3 3 3| ./graphsched.py > schedmistery1.png
