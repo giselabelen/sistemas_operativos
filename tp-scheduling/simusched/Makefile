@@ -15,7 +15,7 @@ $(MAIN): $(OBJS) sched_mistery.o
 basesched.o: basesched.cpp basesched.h
 basetask.o: basetask.cpp basetask.h
 main.o: main.cpp simu.h basetask.h basesched.h tasks.h sched_fcfs.h \
- sched_rr.h sched_rr2.h
+ sched_rr.h sched_rr2.h tareas_structs.h
 simu.o: simu.cpp simu.h basetask.h basesched.h
 simusched.o: simusched.cpp basetask.h basesched.h tasks.h
 tasks.o: tasks.cpp tasks.h basetask.h

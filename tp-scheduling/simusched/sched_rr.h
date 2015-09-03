@@ -5,15 +5,9 @@
 #include <queue>
 #include <list>
 #include "basesched.h"
+#include "tareas_structs.h"
 
 using namespace std;
-
-struct tarea{
-	int pid;
-	bool bloqueado;
-	int cpu;
-	int quantum;
-};
 
 // ver de quitar cant_cpu, esta al pedo.... ver de quitar cppu con doble p de tarea... que tambien esta al pedo..creemos
 
@@ -26,14 +20,11 @@ class SchedRR : public SchedBase {
 		virtual int tick(int cpu, const enum Motivo m);
 		
 	private:
+		int* quantum_x_cpu;			// quantum de cada cpu
+		tarea* actual_x_cpu;		// tarea que corre cada cpu
+		list<tarea> proc_esperando;	// cola de procesos esperando
 
 		int switcheando(int cpu);
-		int cant_cpu;
-		int* quantum_x_cpu;
-		tarea* actual_x_cpu;
-		list<tarea> proc_esperando;
-
-
 };
 
 #endif

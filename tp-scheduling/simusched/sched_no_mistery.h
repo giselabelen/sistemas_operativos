@@ -5,14 +5,9 @@
 #include <queue>
 #include <list>
 #include "basesched.h"
+#include "tareas_structs.h"
 
 using namespace std;
-
-struct tareaMyst{
-	int pid;
-	int prioridad;
-	int quantum;
-};
 
 class SchedNoMistery : public SchedBase {
 	public:
@@ -23,14 +18,13 @@ class SchedNoMistery : public SchedBase {
 		virtual int tick(int cpu, const enum Motivo m);
 
 	private:
-		int cant_prioridades;
-		queue<tareaMyst>* tareas_x_prioridad;
-		int* quantum_x_prioridad;
-		list<tareaMyst> bloqueados;
-		tareaMyst tarea_actual;
-
+		int cant_prioridades;					// cant de prioridades establecidas
+		int* quantum_x_prioridad;				// quantum en cada prioridad
+		tareaMyst tarea_actual;					// tarea corriendo ahora
+		list<tareaMyst> bloqueados;				// procesos bloqueados
+		queue<tareaMyst>* tareas_x_prioridad;	// tareas en cada prioridad
+		
 		int switcheando();
-
 };
 
 #endif

@@ -37,52 +37,34 @@ void TaskConsola(int pid, vector<int> params) { // params: n, bmin, bmax
 	return;
 }
 
-//esta funcion es para entender a sched mystery.. es una task que corre un cierto totalcpu ciclos, se bloquea
-//una vez en el ciclo numero lugardebloqueo y durante longbloqueo ciclos. totalcpu no contepla los ciclos que estuvo 
-//bloqueado
-void TaskExpMyst(int pid, vector<int> params) { // params: totalcpu, lugardebloqueo, longbloqueo, cant_bloqueos
-	
-	int totalcpu = params[0];
-	int lugardebloqueo = params[1];
-	int longbloqueo = params[2];
-	int cant_bloqueos = params[3];
-	
-	uso_CPU(pid, lugardebloqueo - 1);
-	
-	for (int j = 0; j < cant_bloqueos; j++)
-	{
-		uso_IO(pid,longbloqueo);
-	}
-		
-	uso_CPU(pid, totalcpu - (lugardebloqueo + (cant_bloqueos * longbloqueo)));
-
-	return;
-}
-
-
-
 void TaskBatch(int pid, vector<int> params) { // params: totalcpu, cantbloqueos
 	
+	int bloquear;
+	
+	// pongo nombres para que sea más declarativos
 	int totalcpu = params[0];
 	int cantbloqueos = params[1];
+	
 	int cuenta = totalcpu - cantbloqueos;
-	int bloquear;
 	
 	for(int i = 0; i < cuenta-1; i++)
 	{
+		// bloquear va a valer 0 ó 1
 		bloquear = rand() % 2;
 		
-
-
+		// si es 1 y todavía tengo bloqueos por hacer, 
+		// hago una llamada bloqueante.
 		if(bloquear && (cantbloqueos > 0))
 		{
 			uso_IO(pid,1);
 			cantbloqueos--;
 		}
 		
+		// un uso de cpu
 		uso_CPU(pid,1);
 	}
 	
+	// si todavía me faltan bloqueos por hacer, los hago ahora
 	while(cantbloqueos > 0)
 	{
 		uso_IO(pid,1);
@@ -92,12 +74,42 @@ void TaskBatch(int pid, vector<int> params) { // params: totalcpu, cantbloqueos
 	return;
 }
 
+void TaskExpMyst(int pid, vector<int> params) { // params: totalcpu, lugardebloqueo, longbloqueo, cant_bloqueos
+	/* Task creada para experimentar con SchedMistery. Lo que hace es hacer 
+	 * uso de cpu por 'totalcpu' ciclos, y ejecutar 'cant_bloqueos' llamadas 
+	 * bloqueantes a partir del instante 'lugardebloqueo', durando cada una 
+	 * 'longbloqueo' ciclos.'totalcpu' no contempla los ciclos que estuvo bloqueado. 
+	 * 
+	 * IMPORTANTE: ESTO NUNCA CHEQUEA QUE LAS CUENTAS DEN, ASÍ QUE HAY QUE
+	 * SER CUIDADOSOS AL PASAR LOS PARÁMETROS.*/
+	
+	// pongo nombres para que sea más declarativo
+	int totalcpu = params[0];
+	int lugardebloqueo = params[1];
+	int longbloqueo = params[2];
+	int cant_bloqueos = params[3];
+	
+	// uso cpu hasta que tenga que empezar a bloquearse
+	uso_CPU(pid, lugardebloqueo - 1);
+	
+	// hago todas las llamadas bloqueantes
+	for (int j = 0; j < cant_bloqueos; j++)
+	{
+		uso_IO(pid,longbloqueo);
+	}
+	
+	// hago el resto de uso de cpu	
+	uso_CPU(pid, totalcpu - (lugardebloqueo + (cant_bloqueos * longbloqueo)));
+
+	return;
+}
+
 void tasks_init(void) {
 	/* Todos los tipos de tareas se deben registrar acá para poder ser usadas.
 	 * El segundo parámetro indica la cantidad de parámetros que recibe la tarea
 	 * como un vector de enteros, o -1 para una cantidad de parámetros variable. */
 	
-	srand(time(NULL));
+	srand(time(NULL));	// para el rand
 	 
 	register_task(TaskCPU, 1);
 	register_task(TaskIO, 2);
