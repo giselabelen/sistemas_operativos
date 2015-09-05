@@ -8,7 +8,7 @@ Se escribió un lote de tareas para simular la siguiente situación:
 	\item Navegar por internet, que realiza 25 llamadas bloqueantes con una duración variable entre 2 y 4 ciclos.
 \end{itemize}
 
-Estas tareas se ejecutan simultáneamente.
+Estas tareas se ponen a correr en el instante 0, 1 y 2 respectivamente, y Rolando espera que ejecute11n en simultáneo.
 
 \subsection{Pruebas}
 
@@ -32,20 +32,22 @@ En el caso de la Figura \ref{fig-rol1core}, la latencia de cada proceso es:
 
 \begin{itemize}
 	\item {\bf Tarea 0:} latencia 4
-	\item {\bf Tarea 1:} latencia 109
+	\item {\bf Tarea 1:} latencia 108
 	\item {\bf Tarea 2:} latencia 202
 \end{itemize}
 
-Estos valores nos dan un promedio de 105.
+Estos valores nos dan un promedio aproximado de 30,3.
+\vspace*{0.5cm}
 
 Por otro lado, en el caso de la Figura \ref{fig-rol2core}, la latencia de cada proceso es:
 
 \begin{itemize}
-	\item {\bf Tarea 0:} latencia 5
-	\item {\bf Tarea 1:} latencia 5
+	\item {\bf Tarea 0:} latencia 4
+	\item {\bf Tarea 1:} latencia 4
 	\item {\bf Tarea 2:} latencia 83
 \end{itemize}
 
-Estos valores nos dan un promedio de 31.
+Estos valores nos dan un promedio aproximado de 100,6.
+\vspace*{0.5cm}
 
-Por lo tanto, en el caso en el que Rolando se viera obligado a utilizar una computadora con un solo núcleo... [ESCRIBA AQUÍ SU CONCLUSIÓN]
+En el caso en el que Rolando se viera obligado a utilizar una computadora con un solo núcleo, como se utiliza un Sheduler del tipo FCFServe, no podría escuchar su canción preferida MIENTRAS corre el algoritmo, ya que las tres tareas se ejecutarán secuencialmente.  En el caso de poder utilizar una computadora con dos núcleos, podría correrse el algoritmo en uno de ellos y la canción en el otro, y Rolando podría trabajar a gusto.

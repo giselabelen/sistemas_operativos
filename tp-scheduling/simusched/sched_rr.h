@@ -9,8 +9,6 @@
 
 using namespace std;
 
-// ver de quitar cant_cpu, esta al pedo.... ver de quitar cppu con doble p de tarea... que tambien esta al pedo..creemos
-
 class SchedRR : public SchedBase {
 	public:
 		SchedRR(vector<int> argn);

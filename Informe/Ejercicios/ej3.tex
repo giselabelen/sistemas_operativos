@@ -6,9 +6,7 @@ Se programó un tipo de tarea llamado {\tt TaskBatch}.  Este tipo de tarea reali
 
 La idea de nuestro algoritmo se basa en decidir, a cada ciclo y de manera pseudoaleatoria, si se realiza un bloqueo o no.  Para tomar esta decisión vamos a tomar un valor entero ``random'' entre 0 y 1 (1 para bloquear y 0 para no hacerlo), nuevamente utilizando la función {\tt rand()} de C++.
 
-Como cada llamada bloqueante consume 1 ciclo de utilización de CPU, podemos decir que {\it total_cpu} incluye {\it cant_bloqueos} ciclos destinados a las llamadas bloqueantes, y el resto son usos ``puros'' de CPU.  Por este motivo, la decisión pseudoaleatoria de bloquear la tarea se realizará $total\_cpu - cant\_bloqueos$ veces. 
-
-EXPLICAR BIEN POR QUÉ ESTAMOS HACIENDO ESTO
+Como cada llamada bloqueante consume 1 ciclo de utilización de CPU, podemos decir que {\it total_cpu} incluye {\it cant_bloqueos} ciclos destinados a las llamadas bloqueantes, y el resto son usos ``puros'' de CPU.  Por este motivo, la decisión pseudoaleatoria de bloquear la tarea se realizará $total\_cpu - cant\_bloqueos$ veces. Una vez realizados todos los usos ``puros'' de CPU, sólo resta realizar las llamadas bloqueantes necesarias para completar {\it cant_bloqueos}.
 
 La Figura \ref{cod-tbatch} muestra el pseudo-códgo de este algoritmo.
 
@@ -32,3 +30,20 @@ La Figura \ref{cod-tbatch} muestra el pseudo-códgo de este algoritmo.
 \end{figure}
 
 \subsection{Pruebas}
+
+El lote que utilizamos consta de tres tareas, las mismas tratan de mostrar el comportamiento de nuestra {\tt TaskBatch}.  Las características de estas tareas son las siguientes:
+
+\begin{enumerate}
+\item Posee sólo una llamada bloqueante, para mostrar que no siempre realizará la llamada bloqueante al final, sino que la ubicará en el medio con mayor probabilidad.
+\item Posee muchas llamadas bloqueantes, de manera de que las mismas se realicen de forma consecutivas al final con mayor probabilidad.
+\item Posee un número de llamadas bloqueantes cerca de un tercio de la cantidad de tiempo de cpu, para mostrar que las llamadas bloqueantes no necesariamente siguen un patrón.
+\end{enumerate}
+
+La Figura \ref{fig-batch} grafica el lote descrito utilizando un scheduler de tipo FCFS.
+
+\begin{figure}[!htb]
+\begin{center}
+  \includegraphics[scale=0.45]{imagenes/ej3.png}
+\end{center}
+\caption{Simulación para TaskBatch, 1 núcleo, 1 ciclo de cs}\label{fig-batch}
+\end{figure}
