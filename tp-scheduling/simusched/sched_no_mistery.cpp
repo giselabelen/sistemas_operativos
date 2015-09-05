@@ -104,7 +104,7 @@ int SchedNoMistery::tick(int cpu, const enum Motivo m) {
 					copia.prioridad = tarea_actual.prioridad;
 
 					// veo si se le puede bajar o no la prioridad
-					if (copia.prioridad < cant_prioridades)
+					if (copia.prioridad < cant_prioridades-1)
 					{
 						copia.prioridad++;
 					}
