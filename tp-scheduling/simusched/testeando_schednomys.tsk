@@ -1,0 +1,23 @@
+@0
+TaskCPU 40
+TaskCPU 50
+TaskCPU 30
+TaskExpMyst 50 6 3 4 
+
+@15
+TaskCPU 35
+
+@25
+TaskExpMyst 30 8 2 2
+
+@33
+TaskCPU 25
+
+@62
+TaskExpMyst 30 8 2 2
+
+@75
+TaskCPU 20
+TaskCPU 15
+TaskExpMyst 15 2 1 1
+
