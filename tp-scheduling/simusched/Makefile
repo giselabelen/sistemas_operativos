@@ -24,7 +24,7 @@ tasks.o: tasks.cpp tasks.h basetask.h
 clean:
 	rm -f $(OBJS) $(MAIN)
 	cd lotes; \
-	rm *.png
+	rm -f *.png
 
 new: clean all
 

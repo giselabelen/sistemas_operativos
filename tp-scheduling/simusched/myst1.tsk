@@ -8,11 +8,11 @@
 #TaskCPU 20
 
 #------------------------------------------Experimento importante-------------------------------------------#
-TaskExpMyst 20 9 2 1
-TaskExpMyst 20 9 5 1
+#TaskExpMyst 20 9 2 1
+#TaskExpMyst 20 9 5 1
 
-@25
-TaskCPU 20
+#@25
+#TaskCPU 20
 
 #Correr: ./simusched myst1.tsk 1 1 1 SchedMistery 2 4 6 8 | ./graphsched.py > myst1.png
 
@@ -23,4 +23,39 @@ TaskCPU 20
 
 #Tres tasks, dice el ejercicio, podemos poner el primero con tres uso cpu, uno que empiece despues, que muestre como cada argumento es un quantum, el segundo con lo que nos dijo rigoberto, y mostrar como los blocks cambian prioridad aumentandol en uno, y el  tercero puede ser este de arriba, mostrando que el cambio se encuentra en el unblock.
 
+
+#-------------------------------Primer intento (colas de prioridad, quantums)------------------------#
+
+#@0
+#TaskCPU 30
+
+#TaskCPU 30
+
+#@35
+#TaskCPU 30
+
+#@38
+#TaskCPU 30
+
+#./simusched myst1.tsk 1 1 1 SchedMistery 2 4 6 | ./graphsched.py > palinforme1.png
+
+#-----------------------------------------------------------------------------------------------------#
+
+
+# 1er exp: el que ya se hizo
+# 2do exp: como el anterior, pero que los ultimos tres se peleen y muestren lo de que se acumula y eso
+# 3er exp: ver blocks y, si somos muy finos, los unblocks
+
+# TRATAR DE NO USAR MAS DE 4 TAREAS POR EXP
+
+#--------------------------Que pasa en la insercion de elementos ? ---------------
+
+@0 
+TaskCPU 50
+
+@25
+TaskCPU 50
+
+@10
+TaskCPU 50
 
