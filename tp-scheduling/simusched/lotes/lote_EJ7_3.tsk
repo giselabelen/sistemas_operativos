@@ -1,0 +1,7 @@
+# CUANDO SE BLOQUEA
+
+TaskCPU 40
+TaskExpMyst 40 15 2 2
+TaskExpMyst 40 15 2 2
+
+#Correr : ./simusched myst1.tsk 1 1 1 SchedMistery 4 2 6 8 | ./graphsched.py > palinforme4.png
