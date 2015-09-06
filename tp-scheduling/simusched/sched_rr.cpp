@@ -8,7 +8,7 @@ using namespace std;
 
 SchedRR::SchedRR(vector<int> argn) {
 	// Round robin recibe la cantidad de cores y sus cpu_quantum por parámetro
-
+	
 	int cant_cpu = argn[0];
 
 	quantum_x_cpu = new int[cant_cpu];
@@ -81,8 +81,14 @@ int SchedRR::tick(int cpu, const enum Motivo m) {
 				// 		tarea, reseteando su 'quantum' ...
 				if(proc_esperando.empty())
 				{
-					actual_x_cpu[cpu].quantum = quantum_x_cpu[cpu];
-					proximo = actual_x_cpu[cpu].pid;
+					if(actual_x_cpu[cpu].pid >= 0)
+					{
+						actual_x_cpu[cpu].quantum = quantum_x_cpu[cpu];
+						proximo = actual_x_cpu[cpu].pid;
+					}else{
+						actual_x_cpu[cpu].pid = -1;
+						proximo = IDLE_TASK;
+					}
 				}
 				// ...	sino desalojo a la tarea actual y cargo a la siguiente
 				else{

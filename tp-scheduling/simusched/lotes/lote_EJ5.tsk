@@ -1,16 +1,6 @@
-# LOTE EJERCICIO 5
-
 TaskCPU 50
 TaskCPU 50
 TaskCPU 50
 
 TaskConsola 5 3 3
 TaskConsola 5 3 3
-
-# quantum 2, 10 y 50.
-# Con un cambio de contexto de 2 ciclos y un solo nucleo
-
-
-# .././simusched lote_EJ5.tsk 1 2 0 SchedRR 2 | .././graphsched.py > ej5-q2.png
-# .././simusched lote_EJ5.tsk 1 2 0 SchedRR 10 | .././graphsched.py > ej5-q10.png
-# .././simusched lote_EJ5.tsk 1 2 0 SchedRR 50 | .././graphsched.py > ej5-q50.png

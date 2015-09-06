@@ -104,8 +104,13 @@ int SchedRR2::tick(int cpu, const enum Motivo m) {
 				// 		tarea, reseteando su 'quantum' ...
 				if(tareas_x_cpu[cpu].empty())
 				{
-					actual_x_cpu[cpu].quantum = quantum_x_cpu[cpu];
-					proximo = actual_x_cpu[cpu].pid;
+					if(actual_x_cpu[cpu].pid >= 0)
+					{
+						actual_x_cpu[cpu].quantum = quantum_x_cpu[cpu];
+						proximo = actual_x_cpu[cpu].pid;
+					}else{
+						proximo = IDLE_TASK;
+					}
 				}
 				// ...	sino desalojo a la tarea actual y cargo a la siguiente
 				else{

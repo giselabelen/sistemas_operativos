@@ -28,4 +28,38 @@ Para implementar el scheduler, hemos utilizado los siguientes atributos:
 \subparagraph{BLOCK} Se coloca la tarea actual del cpu indicado como ``bloqueada'', se la coloca al final de la lista de tareas del cpu indicado y se procede a buscar la siguiente tarea a ejecutar.  Si no hay más tareas o todas están bloqueadas, se devuelve la constante IDLE_TASK.  En caso contrario, se devuelve el pid de la primer tarea en estado {\it ready} que se encuentre al recorrer la lista correspondiente.
 \subparagraph{EXIT} En primer lugar, se decrementa la cantidad de tareas del cpu indicado. Si no hay más tareas o todas están bloqueadas, se devuelve la constante IDLE_TASK.  En caso contrario, se devuelve el pid de la primer tarea en estado {\it ready} que se encuentre al recorrer la lista.
 
-\subsection{Pruebas}
+\subsection{Migración vs No Migración}
+
+La migración entre núcleos puede ser beneficiosa o no dependiendo del contexto de uso.  Por este motivo, mostraremos un escenario factible en el que la migración entre núcleos es conveniente y otro caso en el cual no lo es. Ambos casos serán planteados sin llamadas bloqueantes para una mejor comprensión.  Además, mostraremos cada escenario a través del simulador, considerando un cambio de contexto de 1 ciclo, 2 cores y un costo de migración de 4 ciclos.
+
+En un caso en el cual se tienen algunas tareas que hacen un uso de CPU por un tiempo extenso y otras que lo utilizan durante poco tiempo, si no se utiliza migración entre núcleos podría ocurrir que las tareas extensas estén corriendo en un core y las demás en otro. La Figura \ref{fig-c2} muestra un ejemplo en el que ocurre esto, y podemos notar que el núcleo 1 rápidamente queda ocioso, mientras que el núcleo 0 sigue corriendo las tareas más pesadas. Por el contrario, la Figura \ref{fig-c1} muestra el mismo caso pero utilizando migración, y es evidente cómo se hace un mejor uso de ambos núcleos y, por lo tanto, el tiempo total de ejecución de las tareas más extensas se reduce considerablemente.  Si tomamos el tiempo total de ejecución de cada tarea en cada caso, obtenemos para la Figura \ref{fig-c2} un promedio de 54 ciclos, mientras que en la Figura \ref{fig-c1} tenemos un promedio de 32 ciclos.  Además, en el primer caso el núcleo 1 se mantuvo ocioso durante 78 ciclos, mientras que en el segundo sólo lo hizo durante 1 ciclo.
+
+\begin{figure}[!htb]
+\begin{center}
+  \includegraphics[scale=0.45]{imagenes/rr2-conviene.png}
+\end{center}
+\caption{No migración de núcleos no beneficiosa}\label{fig-c2}
+\end{figure}
+
+\begin{figure}[!htb]
+\begin{center}
+  \includegraphics[scale=0.45]{imagenes/rr-conviene.png}
+\end{center}
+\caption{Migración de núcleos beneficiosa}\label{fig-c1}
+\end{figure}
+
+Otro caso que podría darse es que se pongan a ejecutar varias tareas cortas de manera secuencial.  Considerando que la migración entre núcleos suele ser bastante costosa, si se requieren numerosas migraciones hasta que cada tarea termina, el waiting-time de ellas se incrementaría de manera considerable, lo cual puede ser poco conveniente dado que se trata de tareas de corta duración.  Esto puede verse en la Figura \ref{fig-nc1}, mientras que, como muestra la Figura \ref{fig-nc2}, no migrar estos procesos permite que terminen en menor tiempo y, por lo tanto, disminuya su waiting-time.  Observando la Figura \ref{fig-nc1} podemos determinar un waiting-time promedio entre todas las tareas de 30,17, mientras que el mismo valor en la Figura \ref{fig-nc2} es de 14.
+
+\begin{figure}[!htb]
+\begin{center}
+  \includegraphics[scale=0.45]{imagenes/rr-noconviene.png}
+\end{center}
+\caption{Migración de núcleos no beneficiosa}\label{fig-nc1}
+\end{figure}
+
+\begin{figure}[!htb]
+\begin{center}
+  \includegraphics[scale=0.45]{imagenes/rr2-noconviene.png}
+\end{center}
+\caption{No migración de núcleos beneficiosa}\label{fig-nc2}
+\end{figure}

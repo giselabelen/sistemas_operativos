@@ -1,20 +1,4 @@
-# conviene: mucha carga en un core, poca en otro
-# no conviene: muchas cosas pequeñas y quantum cortito
-
-
-# dos cosas que tardan en un core
-# dos cosas que no tardan en otro
-# y waiting time y tiempo total se va a la mercole
-
-
 TaskCPU 30
 TaskCPU 4
 TaskCPU 30
 TaskCPU 4
-TaskCPU 30
-TaskCPU 4
-#./../simusched lote_EJ8_c.tsk 2 1 2 SchedRR 2| ./../graphsched.py > rr_conviene.png
-#./../simusched lote_EJ8_c.tsk 2 1 2 SchedRR2 2| ./../graphsched.py > rr2_conviene.png
-
-
-

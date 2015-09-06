@@ -15,7 +15,7 @@ Para experimentar con el Scheduler Mistery hemos creado un nuevo tipo de tarea, 
 Algunos de los lotes con los que experimentaron fueron:
 
 \begin{enumerate}
-\item Dos usos de CPU de 30 ciclos a partir del instante 0 y un uso de CPU de 30 ciclos a partir del instante 40.  Hemos corrido una simulación con este lote para el SchedMyst con 1 ciclo de cambio de contexto y los parámetros 4 2 6 8. Mediante este experimento hemos notado que los parámetros que recibe el scheduler son sucesivos quantums para cada tarea (salvo el primer quantum que por defecto es 1), y que cuando una tarea ingresa mientras otras están corriendo, ejecuta en forma secuencial todos los quantums hasta ``alcanzar'' el primer quantum en el que había quedado alguna de las demás tareas. En la Figura \ref{fig-1} vemos esta simulación, y podemos notar que las tareas 0 y 1 se van alternando los quantums indicados hasta el momento 44, donde ingresa la tarea 3, ejecuta los primeros 4 quantums (contando el 1) para luego seguir alternándose en la ronda las otras dos tareas.
+\item Dos usos de CPU de 30 ciclos a partir del instante 0 y un uso de CPU de 30 ciclos a partir del instante 40.  Hemos corrido una simulación con este lote para el SchedMyst con 1 ciclo de cambio de contexto y los parámetros 4, 2, 6 y 8. Mediante este experimento hemos notado que los parámetros que recibe el scheduler representan los quantums de cada cola de prioridad (salvo el primer nivel que por defecto es de quantum 1), y que al finalizar el quantum actual, cada tarea utiliza el quantum siguiente, o sea que está corriendo en una prioridad más baja.  También se ve que, cuando una tarea ingresa, empieza a correr desde la prioridad más alta y por lo tanto, si la tarea ingresa mientras existen otras tareas activas, éstas no volverán a correr hasta que no haya más tareas con prioridad superior a ellas. En la Figura \ref{fig-1} vemos esta simulación, y podemos notar que las tareas 0 y 1 se van alternando los quantums indicados hasta el momento 44, donde ingresa la tarea 3, ejecuta los primeros 4 quantums (contando el 1) para luego seguir alternándose en la ronda las otras dos tareas.
 
 \begin{figure}[!htb]
 \begin{center}
@@ -24,8 +24,24 @@ Algunos de los lotes con los que experimentaron fueron:
 \caption{Simulación lote 1 con SchedMistery, 1 ciclos de cs}\label{fig-1}
 \end{figure}
 
-\item 
-\item 
+\item Cuatro usos de CPU de 30 ciclos, dos comenzando en el instante 0, uno en el 35 y otro en el 38. Hemos corrido una simulación con este lote para el SchedMyst con 1 ciclo de cambio de contexto y los parámetros 2, 4 y 6. Mediante este experimento se puede observar que las dos tareas que ingresan últimas se van alternando el CPU hasta llegar al nivel de prioridad de las otras dos tareas que estaban ejecutando desde antes.  Esto fue muy importante para lograr determinar que el scheduler funcionaba con colas de prioridad. En la Figura \ref{fig-2} vemos esta simulación, y podemos notar que las tareas 0 y 1 se van turnando los quantums indicados hasta la llegada de las tareas 2 y 3, y luego quedan en estado {\it ready} hasta que estas últimas llegan a su mismo nivel de prioridad. A su vez se ve claramente cómo las tareas 2 y 3 van pasando por cada nivel de prioridad alternadamente.
+
+\begin{figure}[!htb]
+\begin{center}
+  \includegraphics[scale=0.45]{imagenes/ej7-2.png}
+\end{center}
+\caption{Simulación lote 2 con SchedMistery, 1 ciclos de cs}\label{fig-2}
+\end{figure}
+
+\item Un uso de cpu de 40 ciclos y, a partir del momento 40, dos tareas de tipo {\tt TaskExpMyst} con 40 usos de cpu, bloqueándose 2 veces por 2 ciclos a partir del momento 15. Hemos corrido una simulación con este lote para el SchedMyst con 1 ciclo de cambio de contexto.  Mediante este experimento se puede observar que cada bloqueo hace que la tarea pase a un nivel de prioridad mayor. En la Figura \ref{fig-3} vemos esta simulación, y podemos notar que las tareas 1 y 2 se bloquean mientras ocupan el nivel de prioridad más bajo, y al salir del bloqueo vuelven a bloquearse, para retomar luego su ejecución en dos niveles superiores de prioridad (se evidencia notando el quantum correspondiente a cada nivel de prioridad).
+
+\begin{figure}[!htb]
+\begin{center}
+  \includegraphics[scale=0.45]{imagenes/ej7-3.png}
+\end{center}
+\caption{Simulación lote 3 con SchedMistery, 1 ciclos de cs}\label{fig-3}
+\end{figure}
+
 \end{enumerate}
 
 A continuación explicaremos la implementación realizada para replicar el funcionamiento del Scheduler Mistery.

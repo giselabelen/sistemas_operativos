@@ -1,4 +1,4 @@
-# LO QUE ACUMULA SON QUANTUMS SEPARADOS - IDEA DE COLAS
+# IDEA DE COLAS
 
 @0
 TaskCPU 30
@@ -10,6 +10,3 @@ TaskCPU 30
 
 @38
 TaskCPU 30
-
-#./simusched myst1.tsk 1 1 1 SchedMistery 2 4 6 | ./graphsched.py > palinforme1.png
-
