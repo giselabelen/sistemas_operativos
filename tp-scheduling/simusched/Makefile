@@ -50,6 +50,10 @@ ejercicio5: $(MAIN)
 ejercicio6: $(MAIN)
 
 ejercicio7: $(MAIN)
+	cd lotes; \
+	.././simusched lote_EJ7_1.tsk 1 1 1 SchedMistery 4 2 6 8 | .././graphsched.py > ej7-1.png; \
+	.././simusched lote_EJ7_2.tsk 1 1 1 SchedMistery 2 4 6 | .././graphsched.py > ej7-2.png; \
+	.././simusched lote_EJ7_3.tsk 1 1 1 SchedMistery 4 2 6 8 | .././graphsched.py > ej7-3.png
 
 ejercicio8: $(MAIN)
 
