@@ -1,0 +1,33 @@
+\section{Ejercicio 4 - Round Robin}
+
+A continuación explicaremos nuestra implementación de un Scheduler Round Robin que permite la migración entre núcleos.
+
+\subsection{Representación}
+
+Hemos representado las tareas con una estructura que contiene:
+
+\begin{itemize}
+\item un entero para el pid de la tarea
+\item un entero para el quantum restante de la tarea, en caso de que esté en estado {\it running}
+\item un booleano que indica si la tarea está bloqueada o no
+\end{itemize}
+
+Para implementar el scheduler, hemos utilizado los siguientes atributos:
+
+\begin{itemize}
+\item un arreglo de enteros de tamaño cantidad de cores utilizados, donde cada entero representa el quantum correspondiente a dicho core
+\item un arreglo de tareas del mismo tamaño, donde cada tarea representa la tarea que actualmente está corriendo en dicho core
+\item una lista de tareas, correspondiente a las tareas en estado {\it ready} y {\it waiting}
+\end{itemize}
+
+\subsection{Funciones}
+
+\paragraph{Load} Se crea una nueva tarea con el pid indicado y se agrega como último elemento de la lista de tareas {\it ready} y {\it waiting}.
+
+\paragraph{Unblock} Se recorre la lista de tareas {\it ready} y {\it waiting} hasta encontrar a la tarea con el pid indicado, y colocarla como ``no bloqueada''.
+
+\paragraph{Tick} Se cuenta con tres casos:
+
+\subparagraph{TICK} Primeramente se decrementa el quantum restante de la tarea actual en el cpu indicado.  Si aún tiene quantum para correr, se devuelve su pid.  En caso de que se haya terminado su quantum, se evaluará si existe otra tarea en estado {\it ready}.  De ser así, se devolverá el pid de la primer tarea que se encuentre en dicho estado en la lista de tareas.  Si no hay otra tarea para correr, sea porque todas las demás se encuentran bloqueadas o porque no existen más tareas, se devuelve el pid de la tarea actual del cpu indicado.
+\subparagraph{BLOCK} Se coloca la tarea actual del cpu indicado como ``bloqueada'', se la coloca al final de la lista de tareas y se procede a buscar la siguiente tarea a ejecutar.  Si no hay más tareas o todas están bloqueadas, se devuelve la constante IDLE_TASK.  En caso contrario, se devuelve el pid de la primer tarea en estado {\it ready} que se encuentre al recorrer la lista.
+\subparagraph{EXIT} Si no hay más tareas o todas están bloqueadas, se devuelve la constante IDLE_TASK.  En caso contrario, se devuelve el pid de la primer tarea en estado {\it ready} que se encuentre al recorrer la lista.

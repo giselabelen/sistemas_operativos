@@ -1,0 +1,11 @@
+# ALGORITMO DE RONALDO
+@0
+TaskCPU 100
+
+# MUSICA DE ROLANDO
+@1
+TaskConsola 20 2 4
+
+# INTERNET DE ROLANDO
+@2
+TaskConsola 25 2 4

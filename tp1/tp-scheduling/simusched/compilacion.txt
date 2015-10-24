@@ -1,0 +1,41 @@
+g++ -Wall -pedantic -g -ggdb   -c -o main.o main.cpp
+g++ -Wall -pedantic -g -ggdb   -c -o simu.o simu.cpp
+simu.cpp: In function 'void simulate(SchedBase&, std::vector<ptsk>&, const Settings&)':
+simu.cpp:123:33: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+     for (int i = 0; i <settings.num_cores; i++) {
+                                 ^
+simu.cpp:147:32: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+    for(int i = 0; i < settings.num_cores; i++) {
+                                ^
+simu.cpp:173:32: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+    for(int i = 0; i < settings.num_cores && !unblocked; i++) {
+                                ^
+simu.cpp:186:34: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+   for(int cpu= 0; cpu < settings.num_cores; cpu++){
+                                  ^
+simu.cpp:266:35: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+   for(int i= 0; i < contexts.size(); i++){
+                                   ^
+g++ -Wall -pedantic -g -ggdb   -c -o basesched.o basesched.cpp
+g++ -Wall -pedantic -g -ggdb   -c -o basetask.o basetask.cpp
+g++ -Wall -pedantic -g -ggdb   -c -o tasks.o tasks.cpp
+g++ -Wall -pedantic -g -ggdb   -c -o sched_rr.o sched_rr.cpp
+sched_rr.cpp: In constructor 'SchedRR::SchedRR(std::vector<int>)':
+sched_rr.cpp:13:24: warning: ISO C++ forbids variable length array 'arreglo_q' [-Wvla]
+  int arreglo_q[cant_cpu];
+                        ^
+sched_rr.cpp:14:26: warning: ISO C++ forbids variable length array 'arreglo_t' [-Wvla]
+  tarea arreglo_t[cant_cpu];
+                          ^
+g++ -Wall -pedantic -g -ggdb   -c -o sched_fcfs.o sched_fcfs.cpp
+g++ -Wall -pedantic -g -ggdb   -c -o sched_rr2.o sched_rr2.cpp
+sched_rr2.cpp: In member function 'virtual int SchedRR2::tick(int, Motivo)':
+sched_rr2.cpp:25:1: warning: no return statement in function returning non-void [-Wreturn-type]
+ }
+ ^
+g++ -Wall -pedantic -g -ggdb   -c -o sched_no_mistery.o sched_no_mistery.cpp
+sched_no_mistery.cpp: In member function 'virtual int SchedNoMistery::tick(int, Motivo)':
+sched_no_mistery.cpp:18:1: warning: no return statement in function returning non-void [-Wreturn-type]
+ }
+ ^
+g++ -Wall -pedantic -g -ggdb -o simusched main.o simu.o basesched.o basetask.o tasks.o sched_rr.o sched_fcfs.o sched_rr2.o sched_no_mistery.o sched_mistery.o -lpthread
