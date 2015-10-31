@@ -19,17 +19,17 @@ class RWLock {
         implementación de Read-Write Locks utilizando únicamente Variables de
         Condición. */
 
-        //~ pthread_rwlock_t rwlock;
+        pthread_rwlock_t rwlock;
         
-        pthread_mutex_t mutex;
-		int lectores;
-		int escritores;
-		int leyendo;
-		int escribiendo;
-		int contador;
-		int cont2;
-		pthread_cond_t cond_esperoleer;
-		pthread_cond_t cond_esperoescribir;
+        //~ pthread_mutex_t mutex;
+		//~ int lectores;
+		//~ int escritores;
+		//~ int leyendo;
+		//~ int escribiendo;
+		//~ int contador;
+		//~ int cont2;
+		//~ pthread_cond_t cond_esperoleer;
+		//~ pthread_cond_t cond_esperoescribir;
 };
 
 #endif
