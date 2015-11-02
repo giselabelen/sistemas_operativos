@@ -78,8 +78,10 @@ void test2()
 	for (tid = 0; tid < cant_threads; tid++){
 		nros[tid]=tid;
 		if (tid == cant_escritores){
+			//~ std::cerr << "sale lector " << std::endl;
 			pthread_create(&thread[tid], NULL, lector, &nros[tid]);
 		}else{
+			//~ std::cerr << "sale escritor " << std::endl;
 			pthread_create(&thread[tid], NULL, escritor, &nros[tid]);
 		}
 		//~ std::cerr << "sale thread " << tid << std::endl;
@@ -96,7 +98,7 @@ void test2()
 /* 	CANTIDAD DE LECTORES Y ESCRITORES RANDOM, ORDEN RANDOM 		*/
 void test3()
 {
-	int cant_threads = 101;
+	int cant_threads = 5;
 	
 	pthread_t thread[cant_threads];
     int nros[cant_threads];
@@ -111,8 +113,10 @@ void test3()
 	for (tid = 0; tid < cant_threads; tid++){
 		nros[tid]=tid;
 		if (roles[tid] == 1){
+			//~ std::cerr << "sale escritor " << std::endl;
 			pthread_create(&thread[tid], NULL, escritor, &nros[tid]);
 		}else{
+			//~ std::cerr << "sale lector " << std::endl;
 			pthread_create(&thread[tid], NULL, lector, &nros[tid]);
 		}
 	}
@@ -128,8 +132,10 @@ int main(int argc, char* argv[])
 {
 	srand(time(0));
     //~ test1();
-    test2();
-    //~ test3();
+    //~ test2();
+    test3();
+    //~ lock.wlock();
+    //~ lock.wunlock();
 
     return 0;
 }
