@@ -30,15 +30,16 @@ void RWLock :: rlock() {
     //~ pthread_rwlock_rdlock(&(this->rwlock));
     pthread_mutex_lock(&mutex);
 	lectores++;
-	std::cerr << "entro al ciclo - lector " << std::endl;
-	std::cerr << "escritores " << escritores << " contador " << contador << " - lector " << std::endl;
-	while(escritores > 0 && contador <= LIMITE){
+	//~ std::cerr << "entro al ciclo - lector " << std::endl;
+	//~ std::cerr << "escritores " << escritores << " contador " << contador << " - lector " << std::endl;
+	while((escritores > 0 && contador < LIMITE) || escribiendo > 0){
 		pthread_cond_wait(&cond_esperoleer,&mutex);
 	}
-	std::cerr << "salgo del ciclo - lector " << std::endl;
+	//~ std::cerr << "salgo del ciclo - lector " << std::endl;
 	leyendo++;
 	cont2--;
 	if(cont2 == 0){ contador = 0; }
+	//~ std::cerr << "voy a leer " << std::endl;
 	pthread_mutex_unlock(&mutex);
 }
 
@@ -47,15 +48,16 @@ void RWLock :: wlock() {
     //~ pthread_rwlock_wrlock(&(this->rwlock));
     pthread_mutex_lock(&mutex);
 	escritores++;
-	std::cerr << "entro al ciclo - escritor " << std::endl;
-	std::cerr << "leyendo " << leyendo << " escribiendo " << escribiendo << " lectores " << lectores << " contador " << contador << " - lector " << std::endl;
+	//~ std::cerr << "entro al ciclo - escritor " << std::endl;
+	//~ std::cerr << "leyendo " << leyendo << " escribiendo " << escribiendo << " lectores " << lectores << " contador " << contador << " - escritor " << std::endl;
 	while(leyendo > 0 || escribiendo > 0 || (lectores > 0 && contador >= LIMITE)){
 		pthread_cond_wait(&cond_esperoescribir,&mutex);
 	}
-	std::cerr << "salgo del ciclo - escritor " << std::endl;
+	//~ std::cerr << "salgo del ciclo - escritor " << std::endl;
 	escribiendo++;
 	assert(escribiendo == 1);
-	contador++;
+	//~ contador++;
+	//~ std::cerr << "voy a escribir " << std::endl;
     pthread_mutex_unlock(&mutex);
 }
 
@@ -69,7 +71,7 @@ void RWLock :: runlock() {
 	if(leyendo == 0){
 		pthread_cond_signal(&cond_esperoescribir);
 	}
-	std::cerr << "ya libere - lector " << std::endl;
+	//~ std::cerr << "ya lei " << std::endl;
     pthread_mutex_unlock(&mutex);
 }
 
@@ -79,13 +81,15 @@ void RWLock :: wunlock() {
     pthread_mutex_lock(&mutex);
     escritores--;
 	escribiendo--;
+	contador++;
 	assert(escritores >= 0 && escribiendo == 0);
 	if((escritores == 0 || contador >= LIMITE) && lectores > 0){
+		//~ std::cerr << "entre al if - escritor " << std::endl;
 		cont2 = lectores;
 		pthread_cond_broadcast(&cond_esperoleer);
 	}else{
 		pthread_cond_signal(&cond_esperoescribir);
     }
-    std::cerr << "ya libere - escritor " << std::endl;
+    //~ std::cerr << "ya escribi " << std::endl;
     pthread_mutex_unlock(&mutex);
 }

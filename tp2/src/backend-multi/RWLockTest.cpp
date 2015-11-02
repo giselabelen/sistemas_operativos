@@ -2,6 +2,8 @@
 #include <cstdio>
 #include <ctime>
 #include <stdlib.h>
+#include <unistd.h>
+
 
 //~ #define CANT_ESCRITORES	1
 //~ #define CANT_LECTORES	50
@@ -18,12 +20,22 @@ void test3();
 
 
 RWLock lock;
+//~ int milisec = 100; // length of time to sleep, in miliseconds
+//~ struct timespec req = {0};
+//~ req.tv_sec = 0;
+//~ req.tv_nsec = milisec * 1000000L;
+
 
 void *escritor(void *p_minumero)
 {
 	lock.wlock();
 	int minumero = *((int *) p_minumero);
-	printf("Escribiendo. Soy el thread nro. %d.\n", minumero);
+	//~ printf("Escribiendo. Soy el thread nro. %d.\n", minumero);
+	printf("Voy a escribir. Soy el thread nro. %d.\n", minumero);
+	//~ sleep(1);
+	//~ nanosleep(&req, (struct timespec *)NULL);
+	usleep(100);
+	printf("Ya escribi. Soy el thread nro. %d.\n", minumero);
 	lock.wunlock();
 	return NULL;
 }
@@ -32,7 +44,12 @@ void *lector(void *p_minumero)
 {
 	lock.rlock();
 	int minumero = *((int *) p_minumero);
-	printf("Leyendo. Soy el thread nro. %d.\n", minumero);
+	//~ printf("Leyendo. Soy el thread nro. %d.\n", minumero);
+	printf("Voy a leer. Soy el thread nro. %d.\n", minumero);
+	//~ sleep(1);
+	//~ nanosleep(&req, (struct timespec *)NULL);
+	usleep(100);
+	printf("Ya lei. Soy el thread nro. %d.\n", minumero);
 	lock.runlock();
 	return NULL;
 }
@@ -42,7 +59,7 @@ void *lector(void *p_minumero)
 void test1()
 {
 	int cant_escritores = 1;
-	int cant_lectores = 50;
+	int cant_lectores = 20;
 	int cant_threads = cant_escritores+(2*cant_lectores);
 	
 	pthread_t thread[cant_threads];
@@ -67,7 +84,7 @@ void test1()
 /* 		MANDA MUCHOS ESCRITORES, UN LECTOR, Y MÁS ESCRITORES    */
 void test2()
 {
-	int cant_escritores = 10;
+	int cant_escritores = 20;
 	int cant_lectores = 1;
 	int cant_threads = (2*cant_escritores)+cant_lectores;
 	
@@ -98,7 +115,7 @@ void test2()
 /* 	CANTIDAD DE LECTORES Y ESCRITORES RANDOM, ORDEN RANDOM 		*/
 void test3()
 {
-	int cant_threads = 5;
+	int cant_threads = 41;
 	
 	pthread_t thread[cant_threads];
     int nros[cant_threads];
