@@ -1,20 +1,22 @@
 \section{Backend Multithreaded}
 \subsection{Introduccion}
 Debemos permitir que los jugadores se conecten en simultáneo al Scrabble, para eso utilizaremos distintos threads para atender a cada cliente que se conecte al Backend.
+
 \subsection{Implementacion}
-Ante el problema de implementar varios threads que atiendan a los clientes en simultáneo decidimos utilizar un tablero de palabras que se comparte por todos los threads. Utilizando locks sincronizaremos a los threads \\
-Al tener solo un tablero compartido debemos proteger el tablero de escrituras y lecturas en simultáneo.\\
-Utilizamos el modelo de sincronización clásico de escritores con acceso exclusivo y lectores con acceso compartido.\\
+Ante el problema de implementar varios threads que atiendan a los clientes en simultáneo decidimos utilizar un tablero de palabras que se comparte por todos los threads, los cuales serán sincronizados utilizando locks.
+
+Al tener sólo un tablero compartido debemos protegerlo de escrituras y lecturas en simultáneo. Utilizamos el modelo de sincronización clásico de escritores con acceso exclusivo y lectores con acceso compartido.
+
 Nuestra implementación permite lecturas en simultáneo al tablero de palabras y elimina los tableros de letras utilizados en la implementación original.
+
 Los principales cambios que se hicieron al código original son:
+
 \begin{itemize}
-	\item Creación de Thread al aceptar la conexión del cliente inicializado en la función atender cliente para soportar la atención de múltiples clientes.
-    \item Pedidos de ReadLock y liberación del mismo en La funcion Update ya que esta esta necesita una lectura del tablero.
-    \item Pedido de ReadLock y liberación del mismo en la lectura del Tablero de Palabras cuando el cliente coloca una letra.Debido a que se debe checkear que la letra no esta siendo colocada en una posición que contiene una letra en el tablero.
-    \item Pedido de WriteLock y liberación del mismo cuando el cliente envía palabra al servidor.\\
-    Esto es debido a que esta operación necesita colocar las letras en el tablero modificándolo.
-    \item Checkeo sobre el tablero de palabras si la letra es o no válida, es decir si esta ya fue colocada o no en el tablero.
-    \item Checkeo al insertar una letra o enviar una palabra si alguna de las letras del vector, que contiene la palabra, se coloco ya el tablero de palabras para evitar la escritura de palabras que ya se tornaron inválidas.
+	\item Permitir que el servidor reciba múltiples conexiones, una por cada jugador.  La cantidad de jugadores está seteada en una constante.
+	\item Creación de Thread al aceptar la conexión del cliente, inicializado en la función {\sc atendedor_de_jugador} para soportar la atención de múltiples clientes.
+    \item Pedidos de ReadLock y liberación del mismo en caso de que el cliente solicite un {\it update}, ya que esta operación necesita una lectura del tablero.
+    \item Pedido de ReadLock y liberación del mismo en la lectura del Tablero de Palabras cuando el cliente coloca una {\it letra} en su palabra actual, ya que se debe chequear que la letra esté en una posición adyacente a las demás de la misma palabra, y que no está siendo colocada en una posición que ya contiene una letra en el tablero.
+    \item Pedido de WriteLock y liberación del mismo cuando el cliente envía la operación {\it palabra} al servidor, ya que esta operación necesita modificar el tablero, colocando las letras correspondientes.
+    \item Chequeo sobre el tablero de palabras si la letra es o no válida, es decir si esta ya fue colocada o no en el tablero.
+    \item Chequeo al insertar una {\it letra} o enviar una {\it palabra} si alguna de las casillas correspondientes a las letras de la palabra actual fue ocupada luego de la escritura de otro jugador, para evitar la continuación o escritura de palabras que ya se tornaron inválidas.
 \end{itemize}
-
-

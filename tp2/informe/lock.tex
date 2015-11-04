@@ -1,5 +1,120 @@
 \section{Read Write Lock}
 
+Se implementó un {\it Read-Write Lock} {\bf libre de inanición} utilizando sólo Variables de Condición POSIX. 
+
+La interfaz del lock es la siguiente:
+
+\begin{itemize}
+\item {\bf Constructor:} Inicializa el lock para su utilización.
+\item {\bf rlock():} Pide el lock para lectura.
+\item {\bf wlock():} Pide el lock para escritura.
+\item {\bf runlock():} Libera el lock de lectura.
+\item {\bf wunlock():} Libera el lock de escritura.
+\end{itemize}
+
 \subsection{Implementación}
 
+Este {\it Read-Write Lock} permite lecturas concurrentes y asegura que, mientras se realiza una escritura, ningún otro thread se encuentra escribiendo ó leyendo al mismo tiempo.
+
+Para evitar inanición de escritores, este lock les da cierta prioridad. Es decir, al momento en que un escritor solicita el lock, se espera a que los threads que están leyendo (de haberlos) terminen de hacerlo y se otorga el lock al escritor, dejando en espera a los lectores que hayan llegado después que él. En caso de llegar un escritor mientras se está realizando una escritura, éste obtendrá el lock al terminarse dicha escritura, aún cuando haya lectores en espera.
+
+Sin embargo, si llegasen sucesivos escritores podrían provocar inanición de lectores.  Así que para evitar esto, luego de cierta cantidad de escrituras consecutivas, se otorgará el lock a los lectores que estén esperando en ese momento, y luego se continuará con los escritores restantes (de existir), operando de la misma manera.
+
+Para implementar este {\it Read-Write Lock} se mantienen ciertas variables que permitirán la sincronización adecuada. Éstas incluyen 4 enteros, 2 que representarán la cantidad total de lectores y escritores (esperando y operando) y 2 que representarán la cantidad de lectores y escritores que efectivamente están operando.  Se utiliza también un mutex y dos variables de condición: una para quienes esperan leer y una para quienes esperan escribir.  Todos los enteros se inicializan en 0 (Figura \ref{cod-variables}).
+
+\begin{figure}[!htb]
+\begin{codebox}
+\li {\bf pthread_mutex} mutex(1)
+\li	{\bf int} lectores = 0
+\li	{\bf int} escritores = 0
+\li	{\bf int} leyendo = 0
+\li	{\bf int} escribiendo = 0
+\li	{\bf int} contador = 0
+\li	{\bf int} contador_auxiliar = 0
+\li	{\bf pthread_cond} cond_esperoleer
+\li	{\bf pthread_cond} cond_esperoescribir
+\end{codebox}
+\caption{Pseudocódigo variables}\label{cod-variables}
+\end{figure}
+
+Las Figuras \ref{cod-rlock}, \ref{cod-wlock}, \ref{cod-runlock} y \ref{cod-wunlock} muestran el funcionamiento interno de {\sc rlock(), wlock(), runlock()} y {\sc wunlock()} respectivamente.  La cantidad de escrituras consecutivas está indicada por la constante LIMITE.
+
+\begin{figure}[!htb]
+\begin{codebox}
+\Procname{$\proc{rlock}()$}
+\li mutex.lock
+\li lectores++
+\li \While (escritores $>$ 0 $\wedge$ contador $<$ LIMITE) $\vee$ escribiendo $>$ 0
+\li \Do cond_wait(cond_esperoleer,mutex)
+ 	\End
+\li leyendo++
+\li contador_auxiliar- -
+\li \If contador_auxiliar == 0
+\li \Then contador_auxiliar = 0
+	\End
+\li mutex.unlock
+\end{codebox}
+\caption{Pseudocódigo rlock}\label{cod-rlock}
+\end{figure}
+
+\begin{figure}[!htb]
+\begin{codebox}
+\Procname{$\proc{wlock}()$}
+\li mutex.lock
+\li escritores++
+\li \While leyendo $>$ 0 $\vee$ escribiendo $>$ 0 $\vee$ (lectores $>$ 0 $\wedge$ contador $>$= LIMITE)
+\li \Do cond_wait(cond_esperoescribir,mutex)
+ 	\End
+\li escribiendo++
+\li mutex.unlock
+\end{codebox}
+\caption{Pseudocódigo wlock}\label{cod-wlock}
+\end{figure}
+
+\begin{figure}[!htb]
+\begin{codebox}
+\Procname{$\proc{runlock}()$}
+\li mutex.lock
+\li lectores- -
+\li leyendo- -
+\li \If leyendo == 0
+\li \Then cond_signal(cond_esperoescribir)
+ 	\End
+\li mutex.unlock
+\end{codebox}
+\caption{Pseudocódigo runlock}\label{cod-runlock}
+\end{figure}
+
+\begin{figure}[!htb]
+\begin{codebox}
+\Procname{$\proc{wunlock}()$}
+\li mutex.lock
+\li escribiendo- -
+\li contador++
+\li \If (escritores == 0 $\vee$ contador $>$= 0) $\wedge$ lectores $>$ 0
+\li \Then 	contador_auxiliar = lectores
+\li 			cond_broadcast(cond_esperoleer)
+\li \Else	cond_signal(cond_esperoescribir)
+ 	\End
+\li mutex.unlock
+\end{codebox}
+\caption{Pseudocódigo wunlock}\label{cod-wunlock}
+\end{figure}
+
 \subsection{Testing}
+
+Para testear esta implementación de {\it Read-Write Lock} se corrieron 3 sets de pruebas.  Para todos ellos se consideró el LIMITE = 1 y se crearon sucesivos threads de lectura y escritura para evaluar el funcionamiento.  Entre ellos se comparte una variable entera que comienza en 0, los lectores muestran por pantalla el valor de esta variable al momento de realizar la lectura y los escritores la incrementan al momento de realizar la escritura.  Para notar la concurrencia de lectores y la exclusividad de escritores, se esperan 100 ns en medio de la operación.
+
+Los sets de prueba son los siguientes:
+
+\begin{enumerate}
+\item Se crearon 41 threads, 40 de lectura y 1 de escritura.  El escritor fue creado luego de 20 lectores, para observar que efectivamente tiene prioridad y no muere de inanición, que las lecturas son concurrentes, y que la escritura es exclusiva.  Se espera que el escritor no sea el último thread en correr, ya que esto significaría que no tuvo prioridad y en un caso real significaría inanición.  A su vez, los lectores previos a la escritura deberán mostrar un 0 y los posteriores un 1, y ningún lector debería acceder a la variable durante la escritura.
+\item Se crearon 41 threads, 40 de escritura y 1 de lectura.  El lector fue creado luego de 20 escritores, para observar que efectivamente se cumplía el LIMITE y no moría de inanición y que las escrituras son exclusivas.  Se espera que el lector no sea el último thread en correr, ya que esto significaría que no se respetó el LIMITE y en un caso real significaría inanición.  A su vez, las escrituras deberán ser consecutivas y excluyentes, y la lectura no debería ocurrir durante una escritura.
+\item Se crearon 41 threads y se les asignó el rol de escritor ó lector de manera aleatoria, para chequear un funcionamiento más general.  Se espera que las lecturas sean excluyentes y las lecturas sean concurrentes.
+\end{enumerate}
+
+Se realizaron 10 ejecuciones de cada test, y en todos los casos el comportamiento fue el esperado.
+
+Para ejecutar estos tests: {\tt ./rwlocktest $<$i$>$} (sin $< >$) donde i es 1,2 ó 3 para indicar el test correspondiente.
+
+Queda pendiente la prueba con distintos valores de LIMITE.
