@@ -3,7 +3,7 @@
 Debemos permitir que los jugadores se conecten en simultáneo al Scrabble, para eso utilizaremos distintos threads para atender a cada cliente que se conecte al Backend.
 
 \subsection{Implementacion}
-Ante el problema de implementar varios threads que atiendan a los clientes en simultáneo decidimos utilizar un tablero de palabras que se comparte por todos los threads, los cuales serán sincronizados utilizando locks.
+Ante el problema de implementar varios threads que atiendan a los clientes en simultáneo decidimos utilizar un tablero de palabras que es compartida por todos ellos, los cuales serán sincronizados utilizando locks.
 
 Al tener sólo un tablero compartido debemos protegerlo de escrituras y lecturas en simultáneo. Utilizamos el modelo de sincronización clásico de escritores con acceso exclusivo y lectores con acceso compartido.
 
@@ -17,6 +17,5 @@ Los principales cambios que se hicieron al código original son:
     \item Pedidos de ReadLock y liberación del mismo en caso de que el cliente solicite un {\it update}, ya que esta operación necesita una lectura del tablero.
     \item Pedido de ReadLock y liberación del mismo en la lectura del Tablero de Palabras cuando el cliente coloca una {\it letra} en su palabra actual, ya que se debe chequear que la letra esté en una posición adyacente a las demás de la misma palabra, y que no está siendo colocada en una posición que ya contiene una letra en el tablero.
     \item Pedido de WriteLock y liberación del mismo cuando el cliente envía la operación {\it palabra} al servidor, ya que esta operación necesita modificar el tablero, colocando las letras correspondientes.
-    \item Chequeo sobre el tablero de palabras si la letra es o no válida, es decir si esta ya fue colocada o no en el tablero.
     \item Chequeo al insertar una {\it letra} o enviar una {\it palabra} si alguna de las casillas correspondientes a las letras de la palabra actual fue ocupada luego de la escritura de otro jugador, para evitar la continuación o escritura de palabras que ya se tornaron inválidas.
 \end{itemize}
