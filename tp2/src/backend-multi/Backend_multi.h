@@ -28,12 +28,12 @@ int enviar_error(int socket_fd);
 // otras funciones
 void cerrar_servidor(int signal);
 void terminar_servidor_de_jugador(int socket_fd, list<Casillero>& palabra_actual);
-void quitar_letras(list<Casillero>& palabra_actual);
+//~ void quitar_letras(list<Casillero>& palabra_actual);	// ¡YA NO SE USA!
 bool es_ficha_valida_en_palabra(const Casillero& ficha, const list<Casillero>& palabra_actual);
 Casillero casillero_mas_distante_de(const Casillero& ficha, const list<Casillero>& palabra_actual);
 bool puso_letra_en(unsigned int fila, unsigned int columna, const list<Casillero>& letras);
-bool chequear_palabra_actual(const list<Casillero>& palabra_actual);
-void *te_derivo(void*socket_fd);
+bool chequear_palabra_actual(const list<Casillero>& palabra_actual);	// ¡NUEVA!
+void *te_derivo(void*socket_fd);	// ¡NUEVA!
 
 
 #endif

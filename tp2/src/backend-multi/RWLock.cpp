@@ -1,7 +1,7 @@
 #include "RWLock.h"
 #include <cassert>
 
-#define LIMITE 1
+#define LIMITE 1	// CANTIDAD DE ESCRITURAS CONSECUTIVAS PERMITIDAS EN CASO DE HABER LECTORES ESPERANDO
 
 /* IMPORTANTE: Se brinda una implementación básica del Read-Write Locks
 que hace uso de la implementación provista por pthreads. Está dada para
@@ -29,17 +29,14 @@ void RWLock :: rlock() {
     /* Cambiar por su implementación */
     //~ pthread_rwlock_rdlock(&(this->rwlock));
     pthread_mutex_lock(&mutex);
-	lectores++;
-	//~ std::cerr << "entro al ciclo - lector " << std::endl;
-	//~ std::cerr << "escritores " << escritores << " contador " << contador << " - lector " << std::endl;
+	lectores++;		// SOY UN LECTOR NUEVO
 	while((escritores > 0 && contador < LIMITE) || escribiendo > 0){
+		// O BIEN ALGUIEN ESTA ESCRIBIENDO, O BIEN HAY ESCRITORES Y NO SE SUPERO EL LIMITE
 		pthread_cond_wait(&cond_esperoleer,&mutex);
 	}
-	//~ std::cerr << "salgo del ciclo - lector " << std::endl;
-	leyendo++;
+	leyendo++;	// EMPIEZO A LEER
 	cont2--;
-	if(cont2 == 0){ contador = 0; }
-	//~ std::cerr << "voy a leer " << std::endl;
+	if(cont2 == 0){ contador = 0; }		// YA ES HORA DE QUE PUEDAN VOLVER A PASAR ESCRITORES
 	pthread_mutex_unlock(&mutex);
 }
 
@@ -47,31 +44,27 @@ void RWLock :: wlock() {
     /* Cambiar por su implementación */
     //~ pthread_rwlock_wrlock(&(this->rwlock));
     pthread_mutex_lock(&mutex);
-	escritores++;
-	//~ std::cerr << "entro al ciclo - escritor " << std::endl;
-	//~ std::cerr << "leyendo " << leyendo << " escribiendo " << escribiendo << " lectores " << lectores << " contador " << contador << " - escritor " << std::endl;
+	escritores++;	// SOY UN ESCRITOR NUEVO
 	while(leyendo > 0 || escribiendo > 0 || (lectores > 0 && contador >= LIMITE)){
+		// O BIEN ALGUIEN ESTA LEYENDO/ESCRIBIENDO, O BIEN HAY LECTORES Y YA PASE EL LIMITE
 		pthread_cond_wait(&cond_esperoescribir,&mutex);
 	}
-	//~ std::cerr << "salgo del ciclo - escritor " << std::endl;
-	escribiendo++;
+	escribiendo++;	// EMPIEZO A ESCRIBIR
 	assert(escribiendo == 1);
-	//~ contador++;
-	//~ std::cerr << "voy a escribir " << std::endl;
-    pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&mutex);
 }
 
 void RWLock :: runlock() {
     /* Cambiar por su implementación */
     //~ pthread_rwlock_unlock(&(this->rwlock));
     pthread_mutex_lock(&mutex);
-    lectores--;
-	leyendo--;
+    lectores--;		// YA NO VOY A EXISTIR COMO LECTOR
+	leyendo--;		// YA NO ESTOY LEYENDO
 	assert(lectores >= 0 && leyendo >= 0);
 	if(leyendo == 0){
+		// SI NADIE MAS ESTA LEYENDO, LE AVISO A UN ESCRITOR
 		pthread_cond_signal(&cond_esperoescribir);
 	}
-	//~ std::cerr << "ya lei " << std::endl;
     pthread_mutex_unlock(&mutex);
 }
 
@@ -79,17 +72,17 @@ void RWLock :: wunlock() {
     /* Cambiar por su implementación */
     //~ pthread_rwlock_unlock(&(this->rwlock));
     pthread_mutex_lock(&mutex);
-    escritores--;
-	escribiendo--;
+    escritores--;	// YA NO VOY A EXISTIR COMO ESCRITOR
+	escribiendo--;	// YA NO ESTOY ESCRIBIENDO	
 	contador++;
 	assert(escritores >= 0 && escribiendo == 0);
 	if((escritores == 0 || contador >= LIMITE) && lectores > 0){
-		//~ std::cerr << "entre al if - escritor " << std::endl;
-		cont2 = lectores;
-		pthread_cond_broadcast(&cond_esperoleer);
+		// SI HAY LECTORES ESPERANDO Y, O BIEN NO HAY ESCRITORES O BIEN YA LLEGUE AL LIMITE ...
+		cont2 = lectores;	// GUARDO LA CANTIDAD MINIMA DE LECTORES QUE VAN A LEER HASTA LA PROXIMA ESCRITURA
+		pthread_cond_broadcast(&cond_esperoleer);	// AVISO A TODOS LOS LECTORES
 	}else{
-		pthread_cond_signal(&cond_esperoescribir);
+		// ... SI NO
+		pthread_cond_signal(&cond_esperoescribir);	// AVISO AL PROXIMO ESCRITOR
     }
-    //~ std::cerr << "ya escribi " << std::endl;
     pthread_mutex_unlock(&mutex);
 }

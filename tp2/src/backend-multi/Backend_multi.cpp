@@ -8,12 +8,12 @@ using namespace std;
 int socket_servidor = -1;
 
 // variables globales del juego
-//~ vector<vector<char> > tablero_letras; // tiene letras que aún no son palabras válidas
+//~ vector<vector<char> > tablero_letras; // tiene letras que aún no son palabras válidas - ¡YA NO SE USA!
 vector<vector<char> > tablero_palabras; // solamente tiene las palabras válidas
 unsigned int ancho = -1;
 unsigned int alto = -1;
 
-RWLock lock;
+RWLock lock;	// ¡NUEVO!
 
 
 bool cargar_int(const char* numero, unsigned int& n) {
@@ -46,7 +46,8 @@ int main(int argc, const char* argv[]) {
             return 5;
         }
     }
-
+	
+	// ¡YA NO SE USA!
     // inicializar ambos tableros, se accede como tablero[fila][columna]
     //~ tablero_letras = vector<vector<char> >(alto);
     //~ for (unsigned int i = 0; i < alto; ++i) {
@@ -80,7 +81,7 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
-    // escuchar en el socket
+    // escuchar en el socket - CANT_JUGADORES CONEXIONES
     if (listen(socket_servidor, CANT_JUGADORES) == -1) {
         cerr << "Error escuchando socket!" << endl;
         return 1;
@@ -91,17 +92,18 @@ int main(int argc, const char* argv[]) {
     int i = 0;
     while (i < CANT_JUGADORES) {
         if ((socketfd_cliente[i] = accept(socket_servidor, (struct sockaddr*) &remoto, (socklen_t*) &socket_size)) == -1)
-			// ojo: ver los parametros que toma el accept
             cerr << "Error al aceptar conexion" << endl;
         else {
-            //~ close(socket_servidor);
+            //~ close(socket_servidor);	// YA NO QUIERO CERRAR ACA, QUIERO ESPERAR TODAS LAS CONEXIONES
+            // CREO UN THREAD PARA CADA CONEXION
             pthread_create(&threads[i], NULL, te_derivo, &socketfd_cliente[i]);
             i++;
         }
     }
     
 	close(socket_servidor);
-	// VER SI EL EXIT DE UN THREAD AFECTA SOLO A ESE THREAD
+	
+	// ESPERAR A QUE TERMINEN TODOS LOS THREADS
 	for (int tid = 0; tid < CANT_JUGADORES; tid++){
 		pthread_join(threads[tid], NULL);
 	}
@@ -109,7 +111,7 @@ int main(int argc, const char* argv[]) {
     return 0;
 }
 
-// FUNCION SUPER CABEZA
+// WRAPPER DONDE ARRANCA CADA THREAD - SE DERIVA AL ATENDEDOR DE JUGADOR
 void *te_derivo(void* p_socket_fd) 
 {
 	int socket_fd = *((int *) p_socket_fd);
@@ -121,14 +123,7 @@ void atendedor_de_jugador(int socket_fd) {
     // variables locales del jugador
     char nombre_jugador[21];
     list<Casillero> palabra_actual; // lista de letras de la palabra aún no confirmada
-    //~ vector<vector<char> > tablero_letras; // tiene letras que aún no son palabras válidas
-    
-    // INICIALIZO TABLERO DE LETRAS MÍO
-    //~ tablero_letras = vector<vector<char> >(alto);
-    //~ for (unsigned int i = 0; i < alto; ++i) {
-        //~ tablero_letras[i] = vector<char>(ancho, VACIO);
-    //~ }
-
+ 
     if (recibir_nombre(socket_fd, nombre_jugador) != 0) {
         // el cliente cortó la comunicación, o hubo un error. Cerramos todo.
         terminar_servidor_de_jugador(socket_fd, palabra_actual);
@@ -153,12 +148,13 @@ void atendedor_de_jugador(int socket_fd) {
             }
             // ficha contiene la nueva letra a colocar
             // verificar si es una posición válida del tablero
-            
+            // PIDO LOCK PARA LECTURA
             lock.rlock();
             if (es_ficha_valida_en_palabra(ficha, palabra_actual) && chequear_palabra_actual(palabra_actual)) {
+				// LIBERO EL LOCK
 				lock.runlock();
                 palabra_actual.push_back(ficha);
-                //~ tablero_letras[ficha.fila][ficha.columna] = ficha.letra;
+                //~ tablero_letras[ficha.fila][ficha.columna] = ficha.letra;	// ESTO YA NO LO USO
                 // OK
                 if (enviar_ok(socket_fd) != 0) {
                     // se produjo un error al enviar. Cerramos todo.
@@ -166,8 +162,9 @@ void atendedor_de_jugador(int socket_fd) {
                 }
             }
             else {
+				// LIBERO EL LOCK
 				lock.runlock();
-                //~ quitar_letras(palabra_actual);
+                //~ quitar_letras(palabra_actual);	// ESTO YA NO LO USO
                 palabra_actual.clear();
                 // ERROR
                 if (enviar_error(socket_fd) != 0) {
@@ -177,12 +174,15 @@ void atendedor_de_jugador(int socket_fd) {
             }
         }
         else if (comando == MSG_PALABRA) {
+			// PIDO LOCK DE ESCRITURA
 			lock.wlock();
+			// CHEQUEO QUE TODO ESTE EN ORDEN ANTES DE ESCRIBIR EFECTIVAMENTE (POR SI ALGUIEN ESCRIBIO JUSTO ANTES)
 			if(chequear_palabra_actual(palabra_actual)) {
 				// las letras acumuladas conforman una palabra completa, escribirlas en el tablero de palabras y borrar las letras temporales
 				for (list<Casillero>::const_iterator casillero = palabra_actual.begin(); casillero != palabra_actual.end(); casillero++) {
 					tablero_palabras[casillero->fila][casillero->columna] = casillero->letra;
 				}
+				// LIBERO LOCK DE ESCRITURA
 				lock.wunlock();
 				palabra_actual.clear();
 
@@ -192,6 +192,7 @@ void atendedor_de_jugador(int socket_fd) {
 				}
 			} else {
 				lock.wunlock();
+				// LIBERO LOCK DE ESCRITURA
 				palabra_actual.clear();
                 // ERROR
                 if (enviar_error(socket_fd) != 0) {
@@ -201,12 +202,15 @@ void atendedor_de_jugador(int socket_fd) {
             }
         }
         else if (comando == MSG_UPDATE) {
+			// PIDO LOCK DE LECTURA
 			lock.rlock();
             if (enviar_tablero(socket_fd) != 0) {
+				// LIBERO LOCK DE LECTURA
 				lock.runlock();
                 // se produjo un error al enviar. Cerramos todo.
                 terminar_servidor_de_jugador(socket_fd, palabra_actual);
             }
+            // LIBERO LOCK DE LECTURA
             lock.runlock();
         }
         else if (comando == MSG_INVALID) {
@@ -333,19 +337,22 @@ void terminar_servidor_de_jugador(int socket_fd, list<Casillero>& palabra_actual
 
     close(socket_fd);
 
-    quitar_letras(palabra_actual);
+    //~ quitar_letras(palabra_actual);	ESTO YA NO SE USA
+    palabra_actual.clear();
 
-    exit(-1);
+    //~ exit(-1);	// AHORA EXITEO EL THREAD
+    pthread_exit((void*)-1);
 }
 
-
-void quitar_letras(list<Casillero>& palabra_actual) {
+// ¡YA NO SE USA!
+//~ void quitar_letras(list<Casillero>& palabra_actual) {
     //~ for (list<Casillero>::const_iterator casillero = palabra_actual.begin(); casillero != palabra_actual.end(); casillero++) {
         //~ tablero_letras[casillero->fila][casillero->columna] = VACIO;
     //~ }
     //~ palabra_actual.clear();
-}
+//~ }
 
+// ¡NUEVO! - CHEQUEA QUE LAS LETRAS SIGAN SENDO VALIDAS - POR SI ALGUIEN ESCRIBIO
 bool chequear_palabra_actual(const list<Casillero>& palabra_actual) {
 	for(list<Casillero>::const_iterator casillero = palabra_actual.begin(); casillero != palabra_actual.end(); casillero++)
 	{
@@ -360,7 +367,7 @@ bool es_ficha_valida_en_palabra(const Casillero& ficha, const list<Casillero>& p
     if (ficha.fila < 0 || ficha.fila > alto - 1 || ficha.columna < 0 || ficha.columna > ancho - 1) {
         return false;
     }
-
+	// ESTO YA NO SE USA
     // si el casillero está ocupado, tampoco es válida
     //~ if (tablero_letras[ficha.fila][ficha.columna] != VACIO) {
         //~ return false;

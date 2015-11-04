@@ -28,7 +28,7 @@
 #define MSG_UPDATE 3
 #define MSG_INVALID 99
 
-#define CANT_JUGADORES 2
+#define CANT_JUGADORES 2	// ¡NUEVO! 
 
 
 int recibir(int s, char* buf);

@@ -5,10 +5,6 @@
 #include <unistd.h>
 
 
-//~ #define CANT_ESCRITORES	1
-//~ #define CANT_LECTORES	50
-//~ #define CANT_THREADS	101
-
 /*-----------------------------------*/
 // DEFINO LAS FUNCIONES
 void *escritor(void *p_minumero);
@@ -20,22 +16,17 @@ void test3();
 
 
 RWLock lock;
-//~ int milisec = 100; // length of time to sleep, in miliseconds
-//~ struct timespec req = {0};
-//~ req.tv_sec = 0;
-//~ req.tv_nsec = milisec * 1000000L;
+int compartida = 0;
 
 
 void *escritor(void *p_minumero)
 {
 	lock.wlock();
 	int minumero = *((int *) p_minumero);
-	//~ printf("Escribiendo. Soy el thread nro. %d.\n", minumero);
 	printf("Voy a escribir. Soy el thread nro. %d.\n", minumero);
-	//~ sleep(1);
-	//~ nanosleep(&req, (struct timespec *)NULL);
+	compartida++;
 	usleep(100);
-	printf("Ya escribi. Soy el thread nro. %d.\n", minumero);
+	printf("Escribi %d. Soy el thread nro. %d.\n", compartida, minumero);
 	lock.wunlock();
 	return NULL;
 }
@@ -44,12 +35,9 @@ void *lector(void *p_minumero)
 {
 	lock.rlock();
 	int minumero = *((int *) p_minumero);
-	//~ printf("Leyendo. Soy el thread nro. %d.\n", minumero);
 	printf("Voy a leer. Soy el thread nro. %d.\n", minumero);
-	//~ sleep(1);
-	//~ nanosleep(&req, (struct timespec *)NULL);
 	usleep(100);
-	printf("Ya lei. Soy el thread nro. %d.\n", minumero);
+	printf("Lei %d. Soy el thread nro. %d.\n", compartida, minumero);
 	lock.runlock();
 	return NULL;
 }
@@ -95,19 +83,14 @@ void test2()
 	for (tid = 0; tid < cant_threads; tid++){
 		nros[tid]=tid;
 		if (tid == cant_escritores){
-			//~ std::cerr << "sale lector " << std::endl;
 			pthread_create(&thread[tid], NULL, lector, &nros[tid]);
 		}else{
-			//~ std::cerr << "sale escritor " << std::endl;
 			pthread_create(&thread[tid], NULL, escritor, &nros[tid]);
 		}
-		//~ std::cerr << "sale thread " << tid << std::endl;
 	}
-	//~ std::cerr << "ya saque todos" << std::endl;
 	
 	for (tid = 0; tid < cant_threads; tid++){
 		pthread_join(thread[tid], NULL);
-		//~ std::cerr << "listo thread " << tid << std::endl;
 	}
 }
 
@@ -130,10 +113,8 @@ void test3()
 	for (tid = 0; tid < cant_threads; tid++){
 		nros[tid]=tid;
 		if (roles[tid] == 1){
-			//~ std::cerr << "sale escritor " << std::endl;
 			pthread_create(&thread[tid], NULL, escritor, &nros[tid]);
 		}else{
-			//~ std::cerr << "sale lector " << std::endl;
 			pthread_create(&thread[tid], NULL, lector, &nros[tid]);
 		}
 	}
@@ -147,12 +128,23 @@ void test3()
 
 int main(int argc, char* argv[]) 
 {
+	int var = atoi(argv[1]);
 	srand(time(0));
-    //~ test1();
-    //~ test2();
-    test3();
-    //~ lock.wlock();
-    //~ lock.wunlock();
-
+	
+	switch(var){
+	
+		case 1:
+			test1();
+			break;
+		case 2:
+			test2();
+			break;
+		case 3:
+			test3();
+			break;
+		default:
+			std::cout << "Le pifiaste al numerito" << std::endl;
+	}
+	
     return 0;
 }
