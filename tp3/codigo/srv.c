@@ -28,6 +28,10 @@ void servidor(int mi_cliente)
     int diferidos[cant_srv];
     for(i = 0; i < cant_srv; i++) { diferidos[i] = FALSE; }
     int msj;
+    int resp_apagado = 0;
+    int apagados[cant_srv];
+    for(i = 0; i < cant_srv; i++) { apagados[i] = FALSE; }
+    int cant_srv_activos = cant_srv;
     
     while( ! listo_para_salir ) {
         
@@ -50,14 +54,20 @@ void servidor(int mi_cliente)
              * EL MPI SEND NO SE HACE ACA, SE DEBE ESPERAR CONFIRMACION
              * */
             mi_seq_num = highest_seq_num + 1;
-            reply_faltantes = cant_srv - 1;
-            for(i = 0; i < cant_srv; i++)
-            {
-				if(2*i != mi_cliente - 1)
-				{
-					MPI_Send(&mi_seq_num, 1, MPI_INT, 2*i, TAG_QUIERO_ACCESO, COMM_WORLD);
-				}
-			}
+            reply_faltantes = cant_srv_activos - 1;
+            if (reply_faltantes == 0){
+                //~ sec_critica_ocupada = TRUE;
+                MPI_Send(NULL, 0, MPI_INT, mi_cliente, TAG_OTORGADO, COMM_WORLD);
+            }else{
+                for(i = 0; i < cant_srv; i++)
+                {
+    				if((2*i != mi_cliente - 1) && !apagados[i])
+    				{
+    					MPI_Send(&mi_seq_num, 1, MPI_INT, 2*i, TAG_QUIERO_ACCESO, COMM_WORLD);
+    				}
+    			}
+            }
+
             
             //~ MPI_Send(NULL, 0, MPI_INT, mi_cliente, TAG_OTORGADO, COMM_WORLD);
         }
@@ -76,6 +86,8 @@ void servidor(int mi_cliente)
             {
 				if(diferidos[i])
 				{
+                    assert(!apagados[i]);
+                    diferidos[i] = FALSE;
 					MPI_Send(NULL, 0, MPI_INT, 2*i, TAG_POR_MI_ACCEDE, COMM_WORLD);
 				}
 			}
@@ -88,6 +100,19 @@ void servidor(int mi_cliente)
             assert(origen == mi_cliente);
             debug("Mi cliente avisa que terminó");
             //~ listo_para_salir = TRUE;
+            assert(!hay_pedido_local);
+            resp_apagado = cant_srv_activos - 1;
+            if (resp_apagado == 0){ listo_para_salir = TRUE; }
+            else{
+                for(i = 0; i < cant_srv; i++)
+                {
+                    if(!apagados[i] && (2*i != mi_cliente-1))
+                    {
+                        MPI_Send(NULL, 0, MPI_INT, 2*i, TAG_ME_APAGO, COMM_WORLD);
+                    }
+                }
+            }
+
         }
         
         // AGREGAR LOS CASOS EN QUE RECIVE MSJS DE SERVIDORES
@@ -98,8 +123,10 @@ void servidor(int mi_cliente)
           * ACTUALIZAR EL VALOR DE DIFERIDO O NO PARA ESE SERVER SEGUN LAS REGLAS DE LA TABLITA
           * SI NO LO DIFIERO CONTESTO AL SERVIDOR CON TAG_DALE_QUE_VA
           * */
+          assert(origen%2==0);
+          debug("alguien pidio acceso");
 			if (msj > highest_seq_num){	highest_seq_num = msj; }
-			
+			assert(msj>=mi_seq_num);
 			if (hay_pedido_local && (msj > mi_seq_num || (msj == mi_seq_num && mi_cliente-1 < origen)))
 			{
 				diferidos[origen/2] = TRUE;
@@ -112,12 +139,27 @@ void servidor(int mi_cliente)
            * OCUPAR LA SECCION CRITICA
            * SI ES 0 AVISARLE AL CLIENTE CON EL TAG_OTORGADO
            * */
+
+           debug("pepe me da permiso");
 			reply_faltantes--;
-			
+			//assert(hay_pedido_local || reply_faltantes < 0);
+            if(!hay_pedido_local){ debug("aca me CAGUEEEEEEE"); }
 			if (reply_faltantes == 0){
 				//~ sec_critica_ocupada = TRUE;
 				MPI_Send(NULL, 0, MPI_INT, mi_cliente, TAG_OTORGADO, COMM_WORLD);
 			}
+        }
+
+        else if (tag == TAG_ME_APAGO)
+        {
+            apagados[origen/2] = TRUE;
+            cant_srv_activos--;
+            MPI_Send(NULL, 0, MPI_INT, origen, TAG_OK_APAGATE, COMM_WORLD);
+        }
+
+        else if(tag == TAG_OK_APAGATE){
+            resp_apagado--;
+            if (resp_apagado == 0){ listo_para_salir = TRUE; }
         }
     }
     

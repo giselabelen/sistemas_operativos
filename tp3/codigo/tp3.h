@@ -23,6 +23,8 @@
 #define TAG_TERMINE           50    /* cli -> srv */
 #define TAG_QUIERO_ACCESO	  60	/* srv -> srv */
 #define TAG_POR_MI_ACCEDE	  70	/* srv -> srv */
+#define TAG_ME_APAGO		  80	/* srv -> srv */
+#define TAG_OK_APAGATE		  90	/* srv -> srv */
 
 /* Abreviaciones de constantes MPI que usaremos seguido */
 
