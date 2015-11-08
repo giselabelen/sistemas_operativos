@@ -35,9 +35,9 @@
 
 /* Valores por defecto que se multiplican por (nro_cli + 1) */
 
-#define CANT_ITERACIONES          1
-#define MSEG_COMPUTO_PREVIO       200
-#define MSEG_SECCION_CRITICA      100
+#define CANT_ITERACIONES          220		// tocada
+#define MSEG_COMPUTO_PREVIO       20		// tocada
+#define MSEG_SECCION_CRITICA      10		// tocada
 
 /* Valores por defecto constantes */
 

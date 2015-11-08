@@ -1,37 +1,32 @@
 #include "srv.h"
 
-/*
- *  Ejemplo de servidor que tiene el "sí fácil" para con su
- *  cliente y no se lleva bien con los demás servidores.
- *
- */
-
 void servidor(int mi_cliente)
 {
     MPI_Status status; int origen, tag;
     int hay_pedido_local = FALSE;
     int listo_para_salir = FALSE;
-    // CANTIDAD DE GENTE QUE ME PUEDE HABLAR (mpi_size)
-    int cant_srv;
+    int i;
+    int msj;
+
+    int cant_srv;	// cantidad de servidores originales (antes de que empiecen a apagarse)
     MPI_Comm_size(MPI_COMM_WORLD, &cant_srv);
     cant_srv = cant_srv/2;
-    // MI SEQUENCE NUMBER(inicializame en 0?)
-    int mi_seq_num = 0;
-    // EL SEQUENCE NUMBER MAS ALTO(inicializame en 0?)
-    int highest_seq_num = 0;
-    // CONTESTACIONES FALTANTES(inicializame en 0?)
-    int reply_faltantes = 0;
-    // SECCION CRITICA OCUPADA(inicializame en FALSE?)
-    //~ int sec_critica_ocupada = FALSE;
-    // ARREGLO DE DIFERIR RTA
-    int i;
-    int diferidos[cant_srv];
+    
+    int mi_seq_num = 0;	// mi sequence number
+    
+    int highest_seq_num = 0;	// sequence number más alto hasta ahora
+    
+    int reply_faltantes = 0;	// contestaciones faltantes (para cuando pido acceso exclusivo)
+    
+    int diferidos[cant_srv];	// arreglo que dice TRUE en la posición del servidor al que le difiero el reply
     for(i = 0; i < cant_srv; i++) { diferidos[i] = FALSE; }
-    int msj;
-    int resp_apagado = 0;
-    int apagados[cant_srv];
+        
+    int resp_apagado = 0;	// respuestas faltantes para poder apagarme
+    
+    int apagados[cant_srv];	// arreglo que dice TRUE en la posición del servidor que ya se apagó
     for(i = 0; i < cant_srv; i++) { apagados[i] = FALSE; }
-    int cant_srv_activos = cant_srv;
+    
+    int cant_srv_activos = cant_srv;	// cantidad de servidores prendidos en este momento
     
     while( ! listo_para_salir ) {
         
@@ -40,25 +35,20 @@ void servidor(int mi_cliente)
         tag = status.MPI_TAG;
         
         if (tag == TAG_PEDIDO) {
+			// Mi cliente me pide acceso exclusivo
             assert(origen == mi_cliente);
             debug("Mi cliente solicita acceso exclusivo");
             assert(hay_pedido_local == FALSE);
             hay_pedido_local = TRUE;
-            debug("Dándole permiso (frutesco por ahora)");
+            debug("Dándole permiso");
             
-            // ACA HACER LA MAGIA
-            /* SEQUENCE NUMBER MAS ALTO + 1 
-             * PONE EN N-1 CONTESTACIONES FALTANTES
-             * (SE FIJA MANDARLE QUIZAS A LOS SERVERS PRENDIDOS)
-             * MANDO EL PEDIDO A TODOS CON ESE SEQUENCE NUMBER Y TAG_QUIERO_ACCESO Y NUMERO DE SERVER
-             * EL MPI SEND NO SE HACE ACA, SE DEBE ESPERAR CONFIRMACION
-             * */
             mi_seq_num = highest_seq_num + 1;
-            reply_faltantes = cant_srv_activos - 1;
+            reply_faltantes = cant_srv_activos - 1;	// voy a esperar a que los srvs prendidos (menos yo) me den el ok
             if (reply_faltantes == 0){
-                //~ sec_critica_ocupada = TRUE;
+                // si no hay mas srvs que yo, ya le doy el ok a mi cliente
                 MPI_Send(NULL, 0, MPI_INT, mi_cliente, TAG_OTORGADO, COMM_WORLD);
             }else{
+				// si no, aviso a todos los srvs (menos yo)
                 for(i = 0; i < cant_srv; i++)
                 {
     				if((2*i != mi_cliente - 1) && !apagados[i])
@@ -67,21 +57,16 @@ void servidor(int mi_cliente)
     				}
     			}
             }
-
-            
-            //~ MPI_Send(NULL, 0, MPI_INT, mi_cliente, TAG_OTORGADO, COMM_WORLD);
         }
         
         else if (tag == TAG_LIBERO) {
-			/*DESOCUPAR SECCION CRITICA
-			 * MANDAR OK A TODOS LOS DIFERIDOS
-			 * */
-            assert(origen == mi_cliente);
+			// Mi cliente libera su acceso exclusivo
+			assert(origen == mi_cliente);
             debug("Mi cliente libera su acceso exclusivo");
             assert(hay_pedido_local == TRUE);
             hay_pedido_local = FALSE;
             
-            //~ sec_critica_ocupada = FALSE;
+            // doy el ok a los srvs que habia diferido
             for(i = 0; i < cant_srv; i++)
             {
 				if(diferidos[i])
@@ -91,19 +76,21 @@ void servidor(int mi_cliente)
 					MPI_Send(NULL, 0, MPI_INT, 2*i, TAG_POR_MI_ACCEDE, COMM_WORLD);
 				}
 			}
-            // AVISAR AL RESTO DE LOS SRV
         }
         
         else if (tag == TAG_TERMINE) {
-			/*(AVISAR QUE ME APAGO A LOS SERVER)
-			 * */
+			// Mi cliente terminó
             assert(origen == mi_cliente);
             debug("Mi cliente avisa que terminó");
-            //~ listo_para_salir = TRUE;
             assert(!hay_pedido_local);
-            resp_apagado = cant_srv_activos - 1;
-            if (resp_apagado == 0){ listo_para_salir = TRUE; }
+            
+            resp_apagado = cant_srv_activos - 1;	// voy a tener que esperar que todos los srvs prendidos (menos yo) me confirmen
+            if (resp_apagado == 0)
+            {	// si soy el unico srv prendido me apago nomas
+				listo_para_salir = TRUE; 
+			} 
             else{
+				// si no, aviso a todos los srvs prendidos (menos yo) que me apago
                 for(i = 0; i < cant_srv; i++)
                 {
                     if(!apagados[i] && (2*i != mi_cliente-1))
@@ -112,56 +99,57 @@ void servidor(int mi_cliente)
                     }
                 }
             }
-
         }
         
-        // AGREGAR LOS CASOS EN QUE RECIVE MSJS DE SERVIDORES
-        
-        /*RUTINA PARA TAG_QUIERO_ACCESO*/
         else if (tag == TAG_QUIERO_ACCESO) {
-         /* ACTUALIZAR EL NUMERO MAS ALTO
-          * ACTUALIZAR EL VALOR DE DIFERIDO O NO PARA ESE SERVER SEGUN LAS REGLAS DE LA TABLITA
-          * SI NO LO DIFIERO CONTESTO AL SERVIDOR CON TAG_DALE_QUE_VA
-          * */
-          assert(origen%2==0);
-          debug("alguien pidio acceso");
-			if (msj > highest_seq_num){	highest_seq_num = msj; }
+			// un srv me pide acceso exclusivo
+			assert(origen%2==0);
+			debug("alguien pidio acceso");
 			assert(msj>=mi_seq_num);
+			
+			if (msj > highest_seq_num){	highest_seq_num = msj; }	// actualizo sequence number más alto
+			
+			// veo si lo difiero o si le doy el ok (esto sale del paper)
 			if (hay_pedido_local && (msj > mi_seq_num || (msj == mi_seq_num && mi_cliente-1 < origen)))
 			{
 				diferidos[origen/2] = TRUE;
+			}else{ 
+				MPI_Send(NULL, 0, MPI_INT, origen, TAG_POR_MI_ACCEDE, COMM_WORLD); 
 			}
-			else{ MPI_Send(NULL, 0, MPI_INT, origen, TAG_POR_MI_ACCEDE, COMM_WORLD); }
         }
-          //RUTINA PARA EL TAG DALE_QUE_VA
+        
         else if (tag == TAG_POR_MI_ACCEDE) {
-          /*DECREMENTAR LA CUENTA DE CONTESTACIONES FALTANTES
-           * OCUPAR LA SECCION CRITICA
-           * SI ES 0 AVISARLE AL CLIENTE CON EL TAG_OTORGADO
-           * */
-
-           debug("pepe me da permiso");
-			reply_faltantes--;
-			//assert(hay_pedido_local || reply_faltantes < 0);
-            if(!hay_pedido_local){ debug("aca me CAGUEEEEEEE"); }
+			// un srv me da el ok para mi acceso exclusivo
+			debug("alguien me dio permiso");
+			assert(hay_pedido_local);
+			
+			reply_faltantes--;	// actualizo la cantidad de respuestas faltantes
+			
 			if (reply_faltantes == 0){
-				//~ sec_critica_ocupada = TRUE;
+				// si ya me contestaron todos, le aviso a mi cliente
 				MPI_Send(NULL, 0, MPI_INT, mi_cliente, TAG_OTORGADO, COMM_WORLD);
 			}
         }
 
-        else if (tag == TAG_ME_APAGO)
-        {
+        else if (tag == TAG_ME_APAGO) {
+			// un srv me dice que se va a apagar
+			debug("alguien se va");
+			
+			// me anoto que se apaga
             apagados[origen/2] = TRUE;
             cant_srv_activos--;
+            
+            // le doy mi ok para que se apague
             MPI_Send(NULL, 0, MPI_INT, origen, TAG_OK_APAGATE, COMM_WORLD);
         }
 
         else if(tag == TAG_OK_APAGATE){
-            resp_apagado--;
-            if (resp_apagado == 0){ listo_para_salir = TRUE; }
+			// un srv me da el ok para apagarme
+			debug("me llega un ok para apagarme");
+			
+            resp_apagado--;	// ahora espero uno menos
+            
+            if (resp_apagado == 0){ listo_para_salir = TRUE; }	// si ya me confirmaron todos, me apago
         }
-    }
-    
+    }   
 }
-
