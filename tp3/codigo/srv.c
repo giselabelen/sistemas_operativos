@@ -9,8 +9,9 @@ void servidor(int mi_cliente)
     int msj;
 
     int cant_srv;	// cantidad de servidores originales (antes de que empiecen a apagarse)
-    MPI_Comm_size(MPI_COMM_WORLD, &cant_srv);
-    cant_srv = cant_srv/2;
+//    MPI_Comm_size(MPI_COMM_WORLD, &cant_srv);
+//    cant_srv = cant_srv/2;
+	cant_srv = cant_ranks/2;
     
     int mi_seq_num = 0;	// mi sequence number
     
@@ -105,7 +106,7 @@ void servidor(int mi_cliente)
 			// un srv me pide acceso exclusivo
 			assert(origen%2==0);
 			debug("alguien pidio acceso");
-			assert(msj>=mi_seq_num);
+			//~ assert(msj>=mi_seq_num);
 			
 			if (msj > highest_seq_num){	highest_seq_num = msj; }	// actualizo sequence number más alto
 			
