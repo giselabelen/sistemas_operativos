@@ -2,6 +2,7 @@
 
 void servidor(int mi_cliente)
 {
+	char buffer[100];
     MPI_Status status; int origen, tag;
     int hay_pedido_local = FALSE;
     int listo_para_salir = FALSE;
@@ -55,6 +56,8 @@ void servidor(int mi_cliente)
     				if((2*i != mi_cliente - 1) && !apagados[i])
     				{
     					MPI_Send(&mi_seq_num, 1, MPI_INT, 2*i, TAG_QUIERO_ACCESO, COMM_WORLD);
+    					//~ sprintf(buffer, "pedi permiso a %d", i);
+    					//~ debug(buffer);
     				}
     			}
             }
@@ -75,6 +78,8 @@ void servidor(int mi_cliente)
                     assert(!apagados[i]);
                     diferidos[i] = FALSE;
 					MPI_Send(NULL, 0, MPI_INT, 2*i, TAG_POR_MI_ACCEDE, COMM_WORLD);
+					//~ sprintf(buffer, "le di permiso diferido a %d",i);
+					//~ debug(buffer);
 				}
 			}
         }
@@ -106,7 +111,6 @@ void servidor(int mi_cliente)
 			// un srv me pide acceso exclusivo
 			assert(origen%2==0);
 			debug("alguien pidio acceso");
-			//~ assert(msj>=mi_seq_num);
 			
 			if (msj > highest_seq_num){	highest_seq_num = msj; }	// actualizo sequence number más alto
 			
@@ -116,6 +120,8 @@ void servidor(int mi_cliente)
 				diferidos[origen/2] = TRUE;
 			}else{ 
 				MPI_Send(NULL, 0, MPI_INT, origen, TAG_POR_MI_ACCEDE, COMM_WORLD); 
+				//~ sprintf(buffer,"le di permiso a %d",origen/2);
+				//~ debug(buffer);
 			}
         }
         
